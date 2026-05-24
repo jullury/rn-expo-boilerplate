@@ -7,7 +7,8 @@ import { HintRow } from "@/components/hint-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { WebBadge } from "@/components/web-badge";
-import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
+import { BottomTabInset, MaxContentWidth } from "@/constants/theme";
+import { primitives } from "@/theme";
 
 function getDevMenuHint() {
   if (Platform.OS === "web") {
@@ -69,18 +70,18 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: primitives.spacing[24],
     alignItems: "center",
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
+    gap: primitives.spacing[16],
+    paddingBottom: BottomTabInset + primitives.spacing[16],
     maxWidth: MaxContentWidth,
   },
   heroSection: {
     alignItems: "center",
     justifyContent: "center",
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    paddingHorizontal: primitives.spacing[24],
+    gap: primitives.spacing[24],
   },
   title: {
     textAlign: "center",
@@ -89,10 +90,10 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   stepContainer: {
-    gap: Spacing.three,
+    gap: primitives.spacing[16],
     alignSelf: "stretch",
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    paddingHorizontal: primitives.spacing[16],
+    paddingVertical: primitives.spacing[24],
+    borderRadius: primitives.spacing[24],
   },
 });

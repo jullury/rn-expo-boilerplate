@@ -1,7 +1,11 @@
-import { Platform, StyleSheet, Text, type TextProps } from "react-native";
+import { Platform, Text, type TextProps } from "react-native";
 
-import { Fonts, ThemeColor } from "@/constants/theme";
+import type { ThemeColor } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
+import { useThemeTokens } from "@/hooks/use-theme-tokens";
+import { semantic } from "@/theme";
+
+type SemanticTextColorKey = keyof (typeof semantic)["light"]["text"];
 
 export type ThemedTextProps = TextProps & {
   type?:
@@ -13,7 +17,7 @@ export type ThemedTextProps = TextProps & {
     | "link"
     | "linkPrimary"
     | "code";
-  themeColor?: ThemeColor;
+  themeColor?: ThemeColor | SemanticTextColorKey;
 };
 
 export function ThemedText({
@@ -22,65 +26,82 @@ export function ThemedText({
   themeColor,
   ...rest
 }: ThemedTextProps) {
+  const { semantic, primitives, fonts } = useThemeTokens();
   const theme = useTheme();
+
+  const color =
+    themeColor === "primary" ||
+    themeColor === "secondary" ||
+    themeColor === "tertiary" ||
+    themeColor === "inverse" ||
+    themeColor === "link"
+      ? semantic.text[themeColor]
+      : theme[themeColor ?? "text"];
+
+  const variantStyles = {
+    small: {
+      fontSize: primitives.typography.size.sm,
+      lineHeight: primitives.typography.lineHeight.sm,
+      fontWeight: primitives.typography.weight.medium,
+    },
+    smallBold: {
+      fontSize: primitives.typography.size.sm,
+      lineHeight: primitives.typography.lineHeight.sm,
+      fontWeight: primitives.typography.weight.bold,
+    },
+    default: {
+      fontSize: primitives.typography.size.md,
+      lineHeight: primitives.typography.lineHeight.md,
+      fontWeight: primitives.typography.weight.medium,
+    },
+    title: {
+      fontSize: primitives.typography.size.xxl,
+      lineHeight: primitives.typography.lineHeight.xxl,
+      fontWeight: primitives.typography.weight.semibold,
+    },
+    subtitle: {
+      fontSize: primitives.typography.size.xl,
+      lineHeight: primitives.typography.lineHeight.xl,
+      fontWeight: primitives.typography.weight.semibold,
+    },
+    link: {
+      fontSize: primitives.typography.size.sm,
+      lineHeight: primitives.typography.lineHeight.md,
+    },
+    linkPrimary: {
+      fontSize: primitives.typography.size.sm,
+      lineHeight: primitives.typography.lineHeight.md,
+      color: semantic.text.link,
+    },
+    code: {
+      fontFamily: fonts.mono,
+      fontWeight: (Platform.select({ android: "700" }) ?? "500") as
+        | "400"
+        | "500"
+        | "600"
+        | "700"
+        | "bold"
+        | "normal",
+      fontSize: primitives.typography.size.xs,
+      lineHeight: primitives.typography.lineHeight.xs,
+    },
+  } as const;
 
   return (
     <Text
       style={[
-        { color: theme[themeColor ?? "text"] },
-        type === "default" && styles.default,
-        type === "title" && styles.title,
-        type === "small" && styles.small,
-        type === "smallBold" && styles.smallBold,
-        type === "subtitle" && styles.subtitle,
-        type === "link" && styles.link,
-        type === "linkPrimary" && styles.linkPrimary,
-        type === "code" && styles.code,
+        { color },
+        type === "default" && variantStyles.default,
+        type === "title" && variantStyles.title,
+        type === "small" && variantStyles.small,
+        type === "smallBold" && variantStyles.smallBold,
+        type === "subtitle" && variantStyles.subtitle,
+        type === "link" && variantStyles.link,
+        type === "linkPrimary" && variantStyles.linkPrimary,
+        type === "code" && variantStyles.code,
         style,
       ]}
       {...rest}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  small: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: 500,
-  },
-  smallBold: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: 700,
-  },
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: 500,
-  },
-  title: {
-    fontSize: 48,
-    fontWeight: 600,
-    lineHeight: 52,
-  },
-  subtitle: {
-    fontSize: 32,
-    lineHeight: 44,
-    fontWeight: 600,
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 14,
-  },
-  linkPrimary: {
-    lineHeight: 30,
-    fontSize: 14,
-    color: "#3c87f7",
-  },
-  code: {
-    fontFamily: Fonts.mono,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
-    fontSize: 12,
-  },
-});

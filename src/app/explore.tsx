@@ -8,16 +8,17 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Collapsible } from "@/components/ui/collapsible";
 import { WebBadge } from "@/components/web-badge";
-import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
+import { BottomTabInset, MaxContentWidth } from "@/constants/theme";
+import { useThemeTokens } from "@/hooks/use-theme-tokens";
+import { primitives } from "@/theme";
 
 export default function TabTwoScreen() {
   const safeAreaInsets = useSafeAreaInsets();
   const insets = {
     ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
+    bottom: safeAreaInsets.bottom + BottomTabInset + primitives.spacing[16],
   };
-  const theme = useTheme();
+  const { semantic } = useThemeTokens();
 
   const contentPlatformStyle = Platform.select({
     android: {
@@ -27,14 +28,14 @@ export default function TabTwoScreen() {
       paddingBottom: insets.bottom,
     },
     web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
+      paddingTop: primitives.spacing[64],
+      paddingBottom: primitives.spacing[24],
     },
   });
 
   return (
     <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
+      style={[styles.scrollView, { backgroundColor: semantic.bg.canvas }]}
       contentInset={insets}
       contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}
     >
@@ -50,7 +51,7 @@ export default function TabTwoScreen() {
               <ThemedView type="backgroundElement" style={styles.linkButton}>
                 <ThemedText type="link">Expo documentation</ThemedText>
                 <SymbolView
-                  tintColor={theme.text}
+                  tintColor={semantic.text.primary}
                   name={{
                     ios: "arrow.up.right.square",
                     android: "link",
@@ -157,10 +158,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   titleContainer: {
-    gap: Spacing.three,
+    gap: primitives.spacing[16],
     alignItems: "center",
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
+    paddingHorizontal: primitives.spacing[24],
+    paddingVertical: primitives.spacing[64],
   },
   centerText: {
     textAlign: "center",
@@ -170,17 +171,17 @@ const styles = StyleSheet.create({
   },
   linkButton: {
     flexDirection: "row",
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
+    paddingHorizontal: primitives.spacing[24],
+    paddingVertical: primitives.spacing[8],
+    borderRadius: primitives.spacing[32],
     justifyContent: "center",
-    gap: Spacing.one,
+    gap: primitives.spacing[4],
     alignItems: "center",
   },
   sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+    gap: primitives.spacing[32],
+    paddingHorizontal: primitives.spacing[24],
+    paddingTop: primitives.spacing[16],
   },
   collapsibleContent: {
     alignItems: "center",
@@ -188,8 +189,8 @@ const styles = StyleSheet.create({
   imageTutorial: {
     width: "100%",
     aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
+    borderRadius: primitives.spacing[16],
+    marginTop: primitives.spacing[8],
   },
   imageReact: {
     width: 100,
