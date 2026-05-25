@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { GENERATED_MARKER } from "@/lib/setup/constants";
@@ -6,6 +6,14 @@ import type { SetupConfig } from "@/lib/setup/types";
 
 export type GenerationResult = {
   created: string[];
+};
+
+const FEATURE_TO_DIR: Record<keyof SetupConfig["features"], string> = {
+  auth: "auth",
+  analytics: "analytics",
+  errorReporting: "error-reporting",
+  pushNotifications: "push-notifications",
+  payments: "payments",
 };
 
 function providerSelectionContent(config: SetupConfig) {
@@ -50,9 +58,13 @@ export async function generateManagedArtifacts(
     rootDir,
     "src/lib/api/providers/generated",
   );
+  const featuresGeneratedDir = path.join(rootDir, "src/features/generated");
+  const appGeneratedDir = path.join(rootDir, "src/app/generated");
 
   await mkdir(setupGeneratedDir, { recursive: true });
   await mkdir(providerGeneratedDir, { recursive: true });
+  await mkdir(featuresGeneratedDir, { recursive: true });
+  await mkdir(appGeneratedDir, { recursive: true });
 
   const setupFile = path.join(rootDir, "app.setup.json");
   await writeFile(setupFile, `${JSON.stringify(config, null, 2)}\n`, "utf8");
@@ -79,6 +91,38 @@ export async function generateManagedArtifacts(
   );
   await writeFile(adapterResolverFile, adapterResolverContent(), "utf8");
   created.push("src/lib/api/providers/generated/adapter-resolver.ts");
+
+  for (const [feature, enabled] of Object.entries(config.features) as [
+    keyof SetupConfig["features"],
+    boolean,
+  ][]) {
+    const featureDirName = FEATURE_TO_DIR[feature];
+    const featureDir = path.join(featuresGeneratedDir, featureDirName);
+    const appDir = path.join(appGeneratedDir, featureDirName);
+
+    if (!enabled) {
+      await rm(featureDir, { recursive: true, force: true });
+      await rm(appDir, { recursive: true, force: true });
+      continue;
+    }
+
+    await mkdir(featureDir, { recursive: true });
+    await mkdir(appDir, { recursive: true });
+
+    await writeFile(
+      path.join(featureDir, "index.ts"),
+      `${GENERATED_MARKER}\nexport const ${feature}Enabled = true;\n`,
+      "utf8",
+    );
+    created.push(`src/features/generated/${featureDirName}/index.ts`);
+
+    await writeFile(
+      path.join(appDir, "index.ts"),
+      `${GENERATED_MARKER}\nexport const ${feature}RouteEnabled = true;\n`,
+      "utf8",
+    );
+    created.push(`src/app/generated/${featureDirName}/index.ts`);
+  }
 
   return { created };
 }
