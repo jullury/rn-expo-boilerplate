@@ -10,9 +10,10 @@ degradation.
 - API layer (`axios`) + normalized error mapping + auth token injection + 401 retry
 - Auth/session store (`zustand`) + secure token storage + contract lifecycle
 - Contracts-first provider adapters (Supabase, Convex, Firebase, Custom)
+- Provider starter modules (Supabase, Convex, Firebase) with auth + API helper examples
 - Setup wizard (`pnpm run project:setup`) for provider + feature selection
 - Runtime env contract validation with safe degradation
-- Observability provider contracts with noop fallback
+- Observability provider contracts with noop fallback + vendor wiring (Sentry/PostHog)
 - Jest + React Native Testing Library baseline
 - CI workflow (`lint`, `typecheck`, `test`, Maestro dry-run)
 - EAS build profiles (`preview`, `production`)
@@ -163,7 +164,7 @@ The value is read in `src/lib/api/client.ts`.
   - Normalized error mapping
 - **Developer experience**
   - Lint + typecheck + test scripts passing
-  - Jest baseline with 21 test suites, all passing
+  - Jest baseline with 27 test suites, all passing
   - CI workflow on `main` + `develop`
   - Maestro flow validation in CI (auth + navigation)
   - EAS config (`preview` + `production`)
@@ -185,8 +186,11 @@ The value is read in `src/lib/api/client.ts`.
   - Auth success flow with form input + post-auth assertions
   - Tab navigation flow (Home → Explore → Home)
 - **Security**
-  - Gitleaks secret scanning config
-  - Dependency audit gate in CI
+  - Pre-commit gitleaks hook (local skip fallback, CI enforced)
+  - Pre-commit dependency audit warning hook
+  - Dependency audit allowlist enforcement in CI (`scripts/ci/check-audit.mjs`)
+  - Runtime validation production warnings for missing env keys
+  - Default API security headers (`nosniff`, `DENY`, strict `Referrer-Policy`)
   - Security policy and runbooks
 
 ### 🟡 Partially implemented (scaffolded, not fully productized)
@@ -194,13 +198,10 @@ The value is read in `src/lib/api/client.ts`.
 - Notification delivery lifecycle (token sync backend, topic segmentation)
 - Permissions UX (pre-permission education screens, denial recovery flows)
 - Auth backend integration (real API login/refresh/logout)
-- Analytics vendor integration (contract exists, no real provider wired)
-- Crash reporting vendor integration (contract exists, no real provider wired)
+- Advanced observability configuration (sampling, release/env tagging, source maps)
 
 ### ⏳ Still pending (recommended next)
 
-- Provider starter modules (real Supabase/Convex/Firebase auth + data examples)
-- Security hardening (runtime config validation, pre-commit secret checks)
 - CLI UX polish (non-interactive flags, `--dry-run`, JSON output)
 - Boilerplate health self-diagnostic script + score
 - Optional module packs / template presets
