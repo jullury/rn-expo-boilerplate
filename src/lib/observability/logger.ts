@@ -1,10 +1,12 @@
+import { redactPayload } from "@/lib/observability/redaction";
+
 type LogMetadata = Record<string, unknown>;
 
 function formatLog(message: string, metadata?: LogMetadata) {
   if (!metadata) {
     return message;
   }
-  return `${message} ${JSON.stringify(metadata)}`;
+  return `${message} ${JSON.stringify(redactPayload(metadata))}`;
 }
 
 export function logInfo(message: string, metadata?: LogMetadata) {
