@@ -41,12 +41,18 @@ function isCircuitOpen() {
 }
 
 export const apiClient = create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
+  baseURL: process.env["EXPO_PUBLIC_API_URL"],
   timeout: 10_000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
+});
+
+Object.assign(apiClient.defaults.headers.common, {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
 });
 
 export const activeApiProviderAdapter = resolveApiProviderAdapter();
