@@ -5,14 +5,14 @@ import { selectFeatures, selectProvider } from "./setup/prompts.mjs";
 import { runSetup } from "./setup/run.mjs";
 
 async function main() {
-  const config = await runSetup({
+  const { previous, next } = await runSetup({
     prompts: {
       selectProvider,
       selectFeatures,
     },
   });
 
-  printSetupSummary(config);
+  printSetupSummary(next, previous);
 }
 
 main().catch((error) => {

@@ -47,9 +47,9 @@ async function writeManagedFile(filePath, content) {
 }
 
 export async function runSetup({ rootDir = process.cwd(), prompts }) {
-  const current = await loadCurrentConfig(rootDir);
-  const provider = await prompts.selectProvider(current.provider);
-  const features = await prompts.selectFeatures(current.features);
+  const previous = await loadCurrentConfig(rootDir);
+  const provider = await prompts.selectProvider(previous.provider);
+  const features = await prompts.selectFeatures(previous.features);
   const next = { version: 1, provider, features };
 
   await writeFile(path.join(rootDir, "app.setup.json"), `${JSON.stringify(next, null, 2)}\n`);
@@ -114,5 +114,5 @@ export async function runSetup({ rootDir = process.cwd(), prompts }) {
     );
   }
 
-  return next;
+  return { previous, next };
 }
