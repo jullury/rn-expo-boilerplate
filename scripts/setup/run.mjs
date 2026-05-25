@@ -76,8 +76,21 @@ export async function runSetup({ rootDir = process.cwd(), prompts }) {
 
   await writeManagedFile(
     path.join(providerGeneratedDir, "adapter-resolver.ts"),
-    `${GENERATED_MARKER}\nimport { convexAdapter } from "@/lib/api/providers/convex/adapter";\nimport { firebaseAdapter } from "@/lib/api/providers/firebase/adapter";\nimport { supabaseAdapter } from "@/lib/api/providers/supabase/adapter";\nimport { selectedProvider } from "@/lib/setup/generated/provider-selection";\n\nconst providerMap = {\n  supabase: supabaseAdapter,\n  convex: convexAdapter,\n  firebase: firebaseAdapter,\n} as const;\n\nexport function resolveApiProviderAdapter() {\n  return providerMap[selectedProvider] ?? supabaseAdapter;\n}\n`,
+    `${GENERATED_MARKER}\nimport { convexAdapter } from "@/lib/api/providers/convex/adapter";\nimport { customAdapter } from "@/lib/api/providers/custom/adapter";\nimport { firebaseAdapter } from "@/lib/api/providers/firebase/adapter";\nimport { supabaseAdapter } from "@/lib/api/providers/supabase/adapter";\nimport { selectedProvider } from "@/lib/setup/generated/provider-selection";\n\nconst providerMap = {\n  supabase: supabaseAdapter,\n  convex: convexAdapter,\n  firebase: firebaseAdapter,\n  custom: customAdapter,\n} as const;\n\nexport function resolveApiProviderAdapter() {\n  return providerMap[selectedProvider] ?? supabaseAdapter;\n}\n`,
   );
+
+  if (provider === "custom") {
+    const customDir = path.join(rootDir, "src/lib/api/providers/custom");
+    await mkdir(customDir, { recursive: true });
+    await writeManagedFile(
+      path.join(customDir, "adapter.ts"),
+      `${GENERATED_MARKER}\nimport type { ApiProviderAdapter } from "@/lib/api/providers/types";\n\nexport const customAdapter: ApiProviderAdapter = {\n  id: "custom",\n  async request() {\n    // TODO: implement custom provider request logic\n    return { ok: false, error: new Error("Custom provider adapter is not implemented") };\n  },\n};\n`,
+    );
+    await writeManagedFile(
+      path.join(customDir, "README.md"),
+      `${GENERATED_MARKER}\n# Custom Provider Adapter\n\nTODO: implement custom provider behavior in adapter.ts.\n`,
+    );
+  }
 
   for (const [feature, enabled] of Object.entries(features)) {
     const dirName = featureToDir[feature];

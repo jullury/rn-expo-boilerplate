@@ -35,6 +35,7 @@ export const setupEnabledFeatures = ${JSON.stringify(config.features, null, 2)} 
 function adapterResolverContent() {
   return `${GENERATED_MARKER}
 import { convexAdapter } from "@/lib/api/providers/convex/adapter";
+import { customAdapter } from "@/lib/api/providers/custom/adapter";
 import { firebaseAdapter } from "@/lib/api/providers/firebase/adapter";
 import { supabaseAdapter } from "@/lib/api/providers/supabase/adapter";
 import { selectedProvider } from "@/lib/setup/generated/provider-selection";
@@ -43,11 +44,29 @@ const providerMap = {
   supabase: supabaseAdapter,
   convex: convexAdapter,
   firebase: firebaseAdapter,
+  custom: customAdapter,
 } as const;
 
 export function resolveApiProviderAdapter() {
   return providerMap[selectedProvider] ?? supabaseAdapter;
 }
+`;
+}
+
+function customAdapterContent() {
+  return `${GENERATED_MARKER}
+import type { ApiProviderAdapter } from "@/lib/api/providers/types";
+
+export const customAdapter: ApiProviderAdapter = {
+  id: "custom",
+  async request() {
+    // TODO: implement custom provider request logic
+    return {
+      ok: false,
+      error: new Error("Custom provider adapter is not implemented"),
+    };
+  },
+};
 `;
 }
 
@@ -109,6 +128,32 @@ export async function generateManagedArtifacts(
   );
   if (await writeManagedFile(adapterResolverFile, adapterResolverContent())) {
     created.push("src/lib/api/providers/generated/adapter-resolver.ts");
+  }
+
+  if (config.provider === "custom") {
+    const customProviderDir = path.join(
+      rootDir,
+      "src/lib/api/providers/custom",
+    );
+    await mkdir(customProviderDir, { recursive: true });
+
+    if (
+      await writeManagedFile(
+        path.join(customProviderDir, "adapter.ts"),
+        customAdapterContent(),
+      )
+    ) {
+      created.push("src/lib/api/providers/custom/adapter.ts");
+    }
+
+    if (
+      await writeManagedFile(
+        path.join(customProviderDir, "README.md"),
+        `${GENERATED_MARKER}\n# Custom Provider Adapter\n\nTODO: implement custom provider behavior in adapter.ts.\n`,
+      )
+    ) {
+      created.push("src/lib/api/providers/custom/README.md");
+    }
   }
 
   for (const [feature, enabled] of Object.entries(config.features) as [
