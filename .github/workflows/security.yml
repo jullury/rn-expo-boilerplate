@@ -69,9 +69,9 @@ jobs:
       - name: Run project health (strict on protected branches)
         run: |
           if [ "${{ github.ref_name }}" = "main" ] || [ "${{ github.ref_name }}" = "develop" ]; then
-            pnpm run project:health -- --strict --json --output-file health-report.json
+            pnpm run project:health --strict --json --output-file health-report.json
           else
-            pnpm run project:health -- --warn --json --output-file health-report.json
+            pnpm run project:health --warn --json --output-file health-report.json
           fi
 
       - name: Upload health report artifact

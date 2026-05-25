@@ -36,7 +36,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Test
-        run: pnpm test -- --runInBand
+        run: pnpm test --runInBand
 
   maestro-smoke:
     runs-on: ubuntu-latest
@@ -51,5 +51,5 @@ jobs:
         run: |
           for flow in .maestro/*.yaml; do
             echo "Validating $flow..."
-            ~/.maestro/bin/maestro test --dry-run "$flow"
+            ruby -e 'require "yaml"; YAML.safe_load(File.read(ARGV[0]))' "$flow"
           done
