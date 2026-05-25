@@ -29,11 +29,13 @@ describe("project:setup CLI flags", () => {
       );
 
       const payload = JSON.parse(stdout) as {
+        schemaVersion: number;
         mode: string;
         provider: string;
         features: Record<string, boolean>;
       };
 
+      expect(payload.schemaVersion).toBe(1);
       expect(payload.mode).toBe("dry-run");
       expect(payload.provider).toBe("firebase");
       expect(payload.features.auth).toBe(true);
@@ -81,5 +83,51 @@ describe("project:setup CLI flags", () => {
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }
+  });
+
+  it("supports --root-dir to target a different project directory", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "setup-flags-"));
+
+    try {
+      await execFileAsync(
+        "node",
+        [
+          setupScript,
+          "--yes",
+          "--provider",
+          "convex",
+          "--features",
+          "auth,analytics",
+          "--root-dir",
+          tempDir,
+        ],
+        { cwd: process.cwd() },
+      );
+
+      const saved = JSON.parse(
+        await readFile(path.join(tempDir, "app.setup.json"), "utf8"),
+      ) as {
+        provider: string;
+        features: Record<string, boolean>;
+      };
+
+      expect(saved.provider).toBe("convex");
+      expect(saved.features.auth).toBe(true);
+      expect(saved.features.analytics).toBe(true);
+      expect(saved.features.errorReporting).toBe(false);
+    } finally {
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("prints help text with --help", async () => {
+    const { stdout } = await execFileAsync("node", [setupScript, "--help"]);
+
+    expect(stdout).toContain("Usage: node ./scripts/setup.mjs");
+    expect(stdout).toContain("--provider");
+    expect(stdout).toContain("--features");
+    expect(stdout).toContain("--dry-run");
+    expect(stdout).toContain("--json");
+    expect(stdout).toContain("--root-dir");
   });
 });

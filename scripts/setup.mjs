@@ -17,9 +17,11 @@ function parseArgs(argv) {
   const options = {
     provider: undefined,
     features: undefined,
+    rootDir: undefined,
     yes: false,
     dryRun: false,
     json: false,
+    help: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -36,6 +38,10 @@ function parseArgs(argv) {
       options.json = true;
       continue;
     }
+    if (arg === "--help" || arg === "-h") {
+      options.help = true;
+      continue;
+    }
     if (arg === "--provider") {
       options.provider = argv[i + 1];
       i += 1;
@@ -46,9 +52,27 @@ function parseArgs(argv) {
       i += 1;
       continue;
     }
+    if (arg === "--root-dir") {
+      options.rootDir = argv[i + 1];
+      i += 1;
+      continue;
+    }
   }
 
   return options;
+}
+
+function printHelp() {
+  console.log("Usage: node ./scripts/setup.mjs [options]");
+  console.log("");
+  console.log("Options:");
+  console.log("  --provider <name>        Provider: supabase|convex|firebase|custom");
+  console.log("  --features <list>        Comma-separated enabled features");
+  console.log("  --yes                    Non-interactive mode for unspecified values");
+  console.log("  --dry-run                Compute and print result without writing files");
+  console.log("  --json                   Emit machine-readable JSON summary");
+  console.log("  --root-dir <path>        Target project directory (default: cwd)");
+  console.log("  --help, -h               Show this help output");
 }
 
 function toPresetFeatures(input, baseFeatures) {
@@ -93,6 +117,10 @@ function validateOptions(options) {
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
+  if (options.help) {
+    printHelp();
+    return;
+  }
   validateOptions(options);
 
   const selectProviderPrompt = options.yes
@@ -116,6 +144,7 @@ async function main() {
   }
 
   const { previous, next } = await runSetup({
+    rootDir: options.rootDir,
     prompts: {
       selectProvider: selectProviderPrompt,
       selectFeatures: selectFeaturesPrompt,
@@ -128,6 +157,7 @@ async function main() {
   if (options.json) {
     const { buildSetupSummary } = await import("./setup/output.mjs");
     const payload = {
+      schemaVersion: 1,
       mode: options.dryRun ? "dry-run" : "apply",
       ...buildSetupSummary(next, previous),
     };
