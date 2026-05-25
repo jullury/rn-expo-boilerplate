@@ -18,6 +18,7 @@ const providerRequiredKeys: Record<SetupProvider, string[]> = {
 
 const featureRequiredKeys: Partial<Record<keyof SetupFeatures, string[]>> = {
   analytics: ["EXPO_PUBLIC_FLAGS_ENDPOINT"],
+  errorReporting: ["EXPO_PUBLIC_SENTRY_DSN"],
 };
 
 export function buildEnvContract(input: BuildEnvContractInput) {

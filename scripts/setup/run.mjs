@@ -28,6 +28,7 @@ const PROVIDER_ENV_KEYS = {
 
 const FEATURE_ENV_KEYS = {
   analytics: ["EXPO_PUBLIC_FLAGS_ENDPOINT"],
+  errorReporting: ["EXPO_PUBLIC_SENTRY_DSN"],
 };
 
 function buildEnvKeys(provider, features) {
