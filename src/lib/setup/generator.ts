@@ -2,6 +2,10 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { GENERATED_MARKER } from "@/lib/setup/constants";
+import {
+  backupManagedFile,
+  shouldOverwriteManagedFile,
+} from "@/lib/setup/file-ownership";
 import type { SetupConfig } from "@/lib/setup/types";
 
 export type GenerationResult = {
@@ -47,6 +51,17 @@ export function resolveApiProviderAdapter() {
 `;
 }
 
+async function writeManagedFile(filePath: string, content: string) {
+  const shouldOverwrite = await shouldOverwriteManagedFile(filePath);
+  if (!shouldOverwrite) {
+    await backupManagedFile(filePath);
+    return false;
+  }
+
+  await writeFile(filePath, content, "utf8");
+  return true;
+}
+
 export async function generateManagedArtifacts(
   config: SetupConfig,
   rootDir = process.cwd(),
@@ -74,23 +89,27 @@ export async function generateManagedArtifacts(
     setupGeneratedDir,
     "provider-selection.ts",
   );
-  await writeFile(
-    providerSelectionFile,
-    providerSelectionContent(config),
-    "utf8",
-  );
-  created.push("src/lib/setup/generated/provider-selection.ts");
+  if (
+    await writeManagedFile(
+      providerSelectionFile,
+      providerSelectionContent(config),
+    )
+  ) {
+    created.push("src/lib/setup/generated/provider-selection.ts");
+  }
 
   const featureFlagsFile = path.join(setupGeneratedDir, "feature-flags.ts");
-  await writeFile(featureFlagsFile, featureFlagsContent(config), "utf8");
-  created.push("src/lib/setup/generated/feature-flags.ts");
+  if (await writeManagedFile(featureFlagsFile, featureFlagsContent(config))) {
+    created.push("src/lib/setup/generated/feature-flags.ts");
+  }
 
   const adapterResolverFile = path.join(
     providerGeneratedDir,
     "adapter-resolver.ts",
   );
-  await writeFile(adapterResolverFile, adapterResolverContent(), "utf8");
-  created.push("src/lib/api/providers/generated/adapter-resolver.ts");
+  if (await writeManagedFile(adapterResolverFile, adapterResolverContent())) {
+    created.push("src/lib/api/providers/generated/adapter-resolver.ts");
+  }
 
   for (const [feature, enabled] of Object.entries(config.features) as [
     keyof SetupConfig["features"],
@@ -109,19 +128,23 @@ export async function generateManagedArtifacts(
     await mkdir(featureDir, { recursive: true });
     await mkdir(appDir, { recursive: true });
 
-    await writeFile(
-      path.join(featureDir, "index.ts"),
-      `${GENERATED_MARKER}\nexport const ${feature}Enabled = true;\n`,
-      "utf8",
-    );
-    created.push(`src/features/generated/${featureDirName}/index.ts`);
+    if (
+      await writeManagedFile(
+        path.join(featureDir, "index.ts"),
+        `${GENERATED_MARKER}\nexport const ${feature}Enabled = true;\n`,
+      )
+    ) {
+      created.push(`src/features/generated/${featureDirName}/index.ts`);
+    }
 
-    await writeFile(
-      path.join(appDir, "index.ts"),
-      `${GENERATED_MARKER}\nexport const ${feature}RouteEnabled = true;\n`,
-      "utf8",
-    );
-    created.push(`src/app/generated/${featureDirName}/index.ts`);
+    if (
+      await writeManagedFile(
+        path.join(appDir, "index.ts"),
+        `${GENERATED_MARKER}\nexport const ${feature}RouteEnabled = true;\n`,
+      )
+    ) {
+      created.push(`src/app/generated/${featureDirName}/index.ts`);
+    }
   }
 
   return { created };
