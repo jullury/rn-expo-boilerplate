@@ -51,8 +51,64 @@ The value is read in `src/lib/api/client.ts`.
 - `src/lib/query` - shared query client
 - `src/lib/storage` - secure/local storage wrappers
 - `src/lib/platform` - network/notifications/haptics/media wrappers
+- `src/lib/observability` - logging, analytics, crash reporting abstractions
+- `src/lib/i18n` - localization, formatting, locale settings
 - `src/providers` - app-level providers
 - `src/store` - global state stores
+
+## Implementation status
+
+### ✅ Implemented
+
+- Core architecture
+  - Query client and provider
+  - API client + normalized error mapping
+  - Auth store + secure token persistence
+  - App store for network state
+- Routing and auth scaffolding
+  - Public/protected route groups
+  - Sign-in gate and guarded protected layout
+- Developer experience
+  - Lint + typecheck + test scripts
+  - Jest baseline with module aliasing
+  - CI workflow on `main` + `develop`
+  - EAS config (`preview` + `production`)
+- Release automation
+  - semantic-release on `main` (stable)
+  - semantic-release on `develop` (beta prereleases)
+  - changelog generation and GitHub release publishing
+- Observability
+  - App error boundary
+  - Analytics and crash-reporting abstraction layers
+- Localization
+  - i18next + react-i18next + expo-localization
+  - EN/FR resources
+  - Locale date/number/currency formatting helpers
+  - No hardcoded user-facing UI copy in core screens/components
+- Platform capability scaffolds
+  - Network subscription + offline banner
+  - Notification permission + token bootstrap
+  - Camera/media permissions helpers
+  - Haptics wrappers
+
+### 🟡 Partially implemented (scaffolded, not fully productized)
+
+- Notification delivery lifecycle (token sync backend, topic segmentation)
+- Permissions UX (pre-permission education screens, denial recovery flows)
+- Auth backend integration (real API login/refresh/logout)
+- Analytics vendor integration (currently abstraction + logs)
+- Crash reporting vendor integration (currently abstraction + logs)
+
+### ⏳ Still pending (recommended next)
+
+- Full design system primitives (modal, toast, bottom sheet, empty/error states)
+- E2E tests (Detox or Maestro)
+- Remote feature flags
+- API retry/backoff/circuit breaker strategy
+- Security hardening pass (secret scanning + stricter headers/config)
+- Production runbooks and incident docs
+
+See `docs/project-health.md` for a fuller status matrix.
 
 ## EAS
 
