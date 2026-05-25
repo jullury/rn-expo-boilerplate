@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import i18n from "@/lib/i18n";
 import { captureError } from "@/lib/observability/crash-reporting";
 import { primitives } from "@/theme";
 
@@ -20,7 +21,9 @@ function ErrorFallback({ error }: FallbackProps) {
   return (
     <ThemedView style={styles.container}>
       <ThemedView type="backgroundElement" style={styles.card}>
-        <ThemedText type="subtitle">Something went wrong</ThemedText>
+        <ThemedText type="subtitle">
+          {i18n.t("common:appErrorTitle")}
+        </ThemedText>
         <ThemedText themeColor="textSecondary">
           {normalizedError.message}
         </ThemedText>

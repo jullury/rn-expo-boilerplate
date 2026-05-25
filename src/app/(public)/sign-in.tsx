@@ -1,5 +1,6 @@
 import { Link, Redirect } from "expo-router";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
@@ -11,6 +12,7 @@ import { primitives } from "@/theme";
 export default function SignInScreen() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const setTokens = useAuthStore((state) => state.setTokens);
+  const { t } = useTranslation("auth");
 
   useEffect(() => {
     trackScreen("sign_in");
@@ -23,9 +25,9 @@ export default function SignInScreen() {
   return (
     <ThemedView style={styles.container}>
       <ThemedView type="backgroundElement" style={styles.card}>
-        <ThemedText type="subtitle">Sign in</ThemedText>
+        <ThemedText type="subtitle">{t("signInTitle")}</ThemedText>
         <ThemedText themeColor="textSecondary">
-          Minimal auth scaffold for the boilerplate.
+          {t("signInDescription")}
         </ThemedText>
 
         <Pressable
@@ -37,12 +39,12 @@ export default function SignInScreen() {
           }
           style={({ pressed }) => [styles.cta, pressed && styles.pressed]}
         >
-          <ThemedText type="smallBold">Continue with demo session</ThemedText>
+          <ThemedText type="smallBold">{t("demoSessionCta")}</ThemedText>
         </Pressable>
 
         <Link href="https://docs.expo.dev" asChild>
           <Pressable style={({ pressed }) => [pressed && styles.pressed]}>
-            <ThemedText type="linkPrimary">Open Expo docs</ThemedText>
+            <ThemedText type="linkPrimary">{t("expoDocsLink")}</ThemedText>
           </Pressable>
         </Link>
       </ThemedView>
