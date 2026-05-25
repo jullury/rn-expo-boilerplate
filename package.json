@@ -38,6 +38,11 @@
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.8",
+    "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.2",
     "eslint": "^9.39.4",
@@ -47,6 +52,7 @@
     "lefthook": "^2.1.8",
     "lint-staged": "^17.0.5",
     "prettier": "^3.8.3",
+    "semantic-release": "^25.0.3",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -59,6 +65,7 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
+    "semantic-release": "semantic-release",
     "format": "prettier --write .",
     "prepare": "lefthook install"
   },

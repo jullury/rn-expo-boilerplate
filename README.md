@@ -59,3 +59,19 @@ The value is read in `src/lib/api/client.ts`.
 
 - `preview` (internal distribution)
 - `production` (auto increment enabled)
+
+## Automated releases (semantic-release)
+
+This repo uses `semantic-release` with conventional commits.
+
+- `main` branch publishes stable releases
+- `develop` branch publishes prereleases on the `beta` channel
+
+Release automation files:
+
+- `.releaserc.json`
+- `.github/workflows/release.yml`
+- `CHANGELOG.md`
+
+To trigger a release, merge commit(s) with conventional commit messages
+(`feat:`, `fix:`, etc.) into `main` or `develop`.
