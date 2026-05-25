@@ -36,18 +36,56 @@ describe("project:health script", () => {
         "export const setupEnvContract = { requiredKeys: [] } as const;\n",
         "utf8",
       );
+      await mkdir(path.join(tempDir, ".github/workflows"), { recursive: true });
+      await writeFile(
+        path.join(tempDir, ".github/workflows/security.yml"),
+        "name: Security\n",
+        "utf8",
+      );
+      await writeFile(
+        path.join(tempDir, "package.json"),
+        JSON.stringify(
+          {
+            scripts: {
+              "project:setup": "node ./scripts/setup.mjs",
+              "project:health": "node ./scripts/health.mjs",
+            },
+          },
+          null,
+          2,
+        ),
+        "utf8",
+      );
 
       const { stdout } = await execFileAsync("node", [healthScript], {
         cwd: tempDir,
       });
       const payload = JSON.parse(stdout) as {
+        schemaVersion: number;
         score: number;
         passed: number;
         total: number;
+        recommendations: string[];
       };
 
+      expect(payload.schemaVersion).toBe(2);
       expect(payload.score).toBe(100);
       expect(payload.passed).toBe(payload.total);
+      expect(payload.recommendations).toEqual([]);
+    } finally {
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("returns non-zero and recommendations when required artifacts are missing", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "setup-health-"));
+
+    try {
+      await expect(
+        execFileAsync("node", [healthScript], {
+          cwd: tempDir,
+        }),
+      ).rejects.toThrow();
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }
