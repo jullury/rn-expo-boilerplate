@@ -1,14 +1,20 @@
 import { Link, Redirect } from "expo-router";
+import { useEffect } from "react";
 import { Pressable, StyleSheet } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { trackScreen } from "@/lib/observability/analytics";
 import { useAuthStore } from "@/store/auth-store";
 import { primitives } from "@/theme";
 
 export default function SignInScreen() {
   const accessToken = useAuthStore((state) => state.accessToken);
   const setTokens = useAuthStore((state) => state.setTokens);
+
+  useEffect(() => {
+    trackScreen("sign_in");
+  }, []);
 
   if (accessToken) {
     return <Redirect href="/" />;
