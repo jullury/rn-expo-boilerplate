@@ -5,6 +5,8 @@ pre-commit:
       run: pnpm lint-staged
     gitleaks:
       run: command -v gitleaks >/dev/null 2>&1 && gitleaks git --pre-commit --verbose || (echo "gitleaks not installed locally; skipping (CI still enforces)" && exit 0)
+    dep-audit:
+      run: pnpm audit --audit-level high || (echo "Dependency vulnerabilities found (non-blocking)" && exit 0)
 
 commit-msg:
   commands:
