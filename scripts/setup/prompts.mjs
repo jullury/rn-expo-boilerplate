@@ -12,6 +12,10 @@ function parseBoolean(inputValue, defaultValue) {
 }
 
 export async function selectProvider(defaultProvider) {
+  if (!process.stdin.isTTY) {
+    return defaultProvider;
+  }
+
   const rl = createInterface({ input, output });
   try {
     const answer = await rl.question(
@@ -27,6 +31,10 @@ export async function selectProvider(defaultProvider) {
 }
 
 export async function selectFeatures(defaultFeatures) {
+  if (!process.stdin.isTTY) {
+    return defaultFeatures;
+  }
+
   const rl = createInterface({ input, output });
   try {
     const keys = Object.keys(defaultFeatures);

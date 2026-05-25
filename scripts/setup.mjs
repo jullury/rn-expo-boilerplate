@@ -4,11 +4,18 @@ import { printSetupSummary } from "./setup/output.mjs";
 import { selectFeatures, selectProvider } from "./setup/prompts.mjs";
 import { runSetup } from "./setup/run.mjs";
 
-const config = await runSetup({
-  prompts: {
-    selectProvider,
-    selectFeatures,
-  },
-});
+async function main() {
+  const config = await runSetup({
+    prompts: {
+      selectProvider,
+      selectFeatures,
+    },
+  });
 
-printSetupSummary(config);
+  printSetupSummary(config);
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
