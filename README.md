@@ -1,56 +1,61 @@
-# Welcome to your Expo app 👋
+# rn-expo-boilerplate
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo SDK 56 boilerplate with production foundations:
 
-## Get started
+- Expo Router + route groups
+- Protected routing scaffold
+- Query client (`@tanstack/react-query`)
+- API layer (`axios`) + normalized error mapping
+- Auth/session store (`zustand`) + secure token storage
+- Jest + React Native Testing Library baseline
+- CI workflow (`lint`, `typecheck`, `test`)
+- EAS build profiles (`preview`, `production`)
 
-1. Install dependencies
+## Requirements
 
-   ```bash
-   npm install
-   ```
+- Node 22+
+- pnpm 10+
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Setup
 
 ```bash
-npm run reset-project
+pnpm install
+pnpm start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Scripts
 
-### Other setup steps
+- `pnpm start` - start Expo dev server
+- `pnpm ios` - open iOS simulator
+- `pnpm android` - open Android emulator
+- `pnpm web` - run web target
+- `pnpm lint` - run Expo ESLint config
+- `pnpm typecheck` - run TypeScript checks
+- `pnpm test` - run Jest tests
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Environment
 
-## Learn more
+Set public API URL for the shared API client:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+EXPO_PUBLIC_API_URL=https://api.example.com
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+The value is read in `src/lib/api/client.ts`.
 
-## Join the community
+## Project layout (current)
 
-Join our community of developers creating universal apps.
+- `src/app/(public)` - public routes (e.g. sign-in)
+- `src/app/(protected)` - guarded app routes
+- `src/lib/api` - API client + error utilities
+- `src/lib/query` - shared query client
+- `src/lib/storage` - secure/local storage wrappers
+- `src/providers` - app-level providers
+- `src/store` - global state stores
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## EAS
+
+`eas.json` includes:
+
+- `preview` (internal distribution)
+- `production` (auto increment enabled)
