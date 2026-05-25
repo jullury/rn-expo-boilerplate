@@ -49,13 +49,23 @@ function buildEnvRequirements(config) {
   return keys;
 }
 
+export function buildSetupSummary(config, previousConfig) {
+  return {
+    provider: config.provider,
+    features: config.features,
+    changes: previousConfig ? computeChanges(previousConfig, config) : [],
+    envRequirements: buildEnvRequirements(config),
+  };
+}
+
 function formatToggle(enabled) {
   return enabled ? "\u2611" : "\u2610";
 }
 
-export function printSetupSummary(config, previousConfig) {
+export function printSetupSummary(config, previousConfig, options = {}) {
+  const modeLabel = options.dryRun ? " Setup Dry Run " : " Setup Complete ";
   console.log("");
-  console.log("\u2500 Setup Complete ".padEnd(60, "\u2500"));
+  console.log(`\u2500${modeLabel}`.padEnd(60, "\u2500"));
   console.log("");
 
   console.log(` Provider: ${config.provider}`);

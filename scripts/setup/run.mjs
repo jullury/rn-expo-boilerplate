@@ -73,11 +73,21 @@ async function writeManagedFile(filePath, content) {
   await writeFile(filePath, content, "utf8");
 }
 
-export async function runSetup({ rootDir = process.cwd(), prompts }) {
+export async function runSetup({
+  rootDir = process.cwd(),
+  prompts,
+  presetProvider,
+  presetFeatures,
+  dryRun = false,
+}) {
   const previous = await loadCurrentConfig(rootDir);
-  const provider = await prompts.selectProvider(previous.provider);
-  const features = await prompts.selectFeatures(previous.features);
+  const provider = presetProvider ?? await prompts.selectProvider(previous.provider);
+  const features = presetFeatures ?? await prompts.selectFeatures(previous.features);
   const next = { version: 1, provider, features };
+
+  if (dryRun) {
+    return { previous, next, applied: false };
+  }
 
   await writeFile(path.join(rootDir, "app.setup.json"), `${JSON.stringify(next, null, 2)}\n`);
 
@@ -149,5 +159,5 @@ export async function runSetup({ rootDir = process.cwd(), prompts }) {
     );
   }
 
-  return { previous, next };
+  return { previous, next, applied: true };
 }
