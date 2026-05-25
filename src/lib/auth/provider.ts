@@ -3,6 +3,7 @@ import {
   getSecureItem,
   setSecureItem,
 } from "@/lib/storage/secure";
+import { trackEvent } from "@/lib/observability/analytics";
 
 import { AuthError } from "@/lib/auth/errors";
 import type {
@@ -51,6 +52,7 @@ export function createAuthProvider({
     async signIn(input) {
       const session = await apiClient.signIn(input);
       await persistSession(session);
+      trackEvent("auth.sign_in_success", { userId: session.user.id });
       return session;
     },
 
@@ -60,6 +62,7 @@ export function createAuthProvider({
         await apiClient.revokeSession(refreshToken);
       }
       await clearSession();
+      trackEvent("auth.sign_out");
     },
 
     async refreshSession() {
@@ -75,6 +78,7 @@ export function createAuthProvider({
 
         const session = await apiClient.refreshSession(refreshToken);
         await persistSession(session);
+        trackEvent("auth.token_refresh_success", { userId: session.user.id });
         return session;
       })();
 
