@@ -1,7 +1,25 @@
 appId: host.exp.Exponent
 name: Smoke Auth Flow
 ---
+# Launch app and verify sign-in gate
 - launchApp
 - assertVisible: "Sign in"
+- assertVisible: "Continue with demo session"
+
+# Fill in valid sign-in form
+- tapOn:
+    text: "Email"
+    index: 0
+- inputText: "demo@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "demodemo123"
+
+# Complete sign-in with demo session
 - tapOn: "Continue with demo session"
+
+# Verify protected app loaded successfully
+- assertVisible: "Home"
 - assertVisible: "Explore"
+- assertNotVisible: "Sign in"

@@ -1,0 +1,31 @@
+appId: host.exp.Exponent
+name: Smoke Tab Navigation Flow
+---
+# Launch app and sign in
+- launchApp
+- assertVisible: "Sign in"
+
+# Fill credentials and sign in
+- tapOn:
+    text: "Email"
+    index: 0
+- inputText: "demo@example.com"
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: "demodemo123"
+- tapOn: "Continue with demo session"
+
+# Verify Home tab content
+- assertVisible: "Home"
+- assertVisible: "Welcome to Expo"
+
+# Navigate to Explore tab
+- tapOn: "Explore"
+- assertVisible: "Explore"
+- assertVisible: "File-based routing"
+- assertVisible: "Expo documentation"
+
+# Navigate back to Home tab
+- tapOn: "Home"
+- assertVisible: "Welcome to Expo"

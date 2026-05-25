@@ -48,4 +48,8 @@ jobs:
         run: curl -Ls "https://get.maestro.mobile.dev" | bash
 
       - name: Validate Maestro flow syntax
-        run: ~/.maestro/bin/maestro test --dry-run .maestro/smoke-auth-flow.yaml
+        run: |
+          for flow in .maestro/*.yaml; do
+            echo "Validating $flow..."
+            ~/.maestro/bin/maestro test --dry-run "$flow"
+          done
