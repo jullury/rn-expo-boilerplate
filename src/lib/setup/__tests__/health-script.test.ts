@@ -62,6 +62,7 @@ describe("project:health script", () => {
       });
       const payload = JSON.parse(stdout) as {
         schemaVersion: number;
+        mode: string;
         score: number;
         passed: number;
         total: number;
@@ -73,6 +74,7 @@ describe("project:health script", () => {
       };
 
       expect(payload.schemaVersion).toBe(2);
+      expect(payload.mode).toBe("strict");
       expect(payload.score).toBe(100);
       expect(payload.passed).toBe(payload.total);
       expect(payload.recommendations).toEqual([]);
@@ -164,9 +166,11 @@ describe("project:health script", () => {
 
       const payload = JSON.parse(await readFile(outputPath, "utf8")) as {
         schemaVersion: number;
+        mode: string;
         score: number;
       };
       expect(payload.schemaVersion).toBe(2);
+      expect(payload.mode).toBe("strict");
       expect(payload.score).toBe(100);
     } finally {
       await rm(tempDir, { recursive: true, force: true });
@@ -227,6 +231,29 @@ describe("project:health script", () => {
       expect(stdout).toContain("Project Health");
       expect(stdout).toContain("Score");
       expect(stdout).toContain("Checks");
+    } finally {
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("supports --warn mode to keep exit code zero for unhealthy projects", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "setup-health-"));
+
+    try {
+      const { stdout } = await execFileAsync(
+        "node",
+        [healthScript, "--json", "--warn"],
+        {
+          cwd: tempDir,
+        },
+      );
+
+      const payload = JSON.parse(stdout) as {
+        mode: string;
+        score: number;
+      };
+      expect(payload.mode).toBe("warn");
+      expect(payload.score).toBeLessThan(100);
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }

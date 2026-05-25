@@ -125,6 +125,7 @@ function parseArgs(argv) {
     json: false,
     outputFile: undefined,
     help: false,
+    mode: "strict",
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -135,6 +136,14 @@ function parseArgs(argv) {
     }
     if (arg === "--help" || arg === "-h") {
       options.help = true;
+      continue;
+    }
+    if (arg === "--strict") {
+      options.mode = "strict";
+      continue;
+    }
+    if (arg === "--warn") {
+      options.mode = "warn";
       continue;
     }
     if (arg === "--output-file") {
@@ -159,6 +168,8 @@ function printHelp() {
   console.log("Options:");
   console.log("  --json                   Emit machine-readable JSON output");
   console.log("  --output-file <path>     Write JSON output to file");
+  console.log("  --strict                 Exit non-zero when score < 100 (default)");
+  console.log("  --warn                   Always exit zero (warning mode)");
   console.log("  --help, -h               Show this help output");
 }
 
@@ -213,6 +224,7 @@ async function main() {
 
   const payload = {
     schemaVersion: 2,
+    mode: options.mode,
     score,
     passed,
     total,
@@ -233,7 +245,7 @@ async function main() {
     printHumanSummary(payload);
   }
 
-  if (score < 100) {
+  if (options.mode === "strict" && score < 100) {
     process.exit(1);
   }
 }
