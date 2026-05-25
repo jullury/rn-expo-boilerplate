@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "provider": "supabase",
+  "features": {
+    "auth": true,
+    "analytics": true,
+    "errorReporting": true,
+    "pushNotifications": true,
+    "payments": false
+  }
+}
