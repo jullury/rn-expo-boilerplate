@@ -4,58 +4,88 @@ Last updated: 2026-05-25
 
 ## Summary
 
-This boilerplate now includes a production-oriented foundation across routing,
-state, API abstraction, i18n, observability, CI/release automation, and core
-platform capability wrappers.
+Production-oriented Expo SDK 56 boilerplate with contracts-first provider
+abstraction, setup-driven feature selection, auth lifecycle enforcement,
+observability with safe degradation, and CI/CD automation.
 
 ## Status Matrix
 
-| Area                                    | Status         | Notes                                                 |
-| --------------------------------------- | -------------- | ----------------------------------------------------- |
-| App routing architecture                | ✅ Implemented | Public/protected route groups and auth gate present   |
-| Global state                            | ✅ Implemented | `useAuthStore` + `useAppStore` via Zustand            |
-| API client and error normalization      | ✅ Implemented | `src/lib/api/client.ts`, `errors.ts`                  |
-| Secure/local persistence                | ✅ Implemented | SecureStore + local storage wrappers                  |
-| Query/data foundation                   | ✅ Implemented | React Query client/provider wired                     |
-| Unit test baseline                      | ✅ Implemented | Jest configured; tests passing                        |
-| CI verification                         | ✅ Implemented | Lint/typecheck/test on `main` and `develop`           |
-| EAS build config                        | ✅ Implemented | Preview + production profiles                         |
-| semantic-release automation             | ✅ Implemented | Stable on `main`, beta on `develop`                   |
-| Setup wizard (`pnpm run project:setup`) | ✅ Implemented | Provider + feature selection with safe reconfigure    |
-| Setup managed feature pruning           | ✅ Implemented | Disabled managed features removed from generated dirs |
-| i18n core                               | ✅ Implemented | i18next + expo-localization, EN/FR resources          |
-| User-facing text localization           | ✅ Implemented | Core screens/components localized                     |
-| Locale formatting helpers               | ✅ Implemented | Date/number/currency helpers added                    |
-| Network awareness UX                    | ✅ Implemented | Offline banner + network subscription                 |
-| Notifications bootstrap                 | 🟡 Scaffolded  | Permission + token bootstrapping present              |
-| Media/camera permissions                | 🟡 Scaffolded  | Wrapper helpers added                                 |
-| Haptics integration                     | 🟡 Scaffolded  | Wrapper helpers added                                 |
-| Analytics vendor integration            | ⏳ Pending     | Abstraction exists; backend vendor not wired          |
-| Crash vendor integration                | ⏳ Pending     | Abstraction exists; backend vendor not wired          |
-| Full UI design system                   | ⏳ Pending     | Button/Input present; modal/toast/sheets pending      |
-| E2E test suite                          | ⏳ Pending     | No Detox/Maestro flow yet                             |
+| Area                                            | Status         | Notes                                                                  |
+| ----------------------------------------------- | -------------- | ---------------------------------------------------------------------- |
+| App routing architecture                        | ✅ Implemented | Public/protected route groups and auth gate present                    |
+| Global state                                    | ✅ Implemented | `useAuthStore` + `useAppStore` + `useSetupStore` via Zustand           |
+| API client + error normalization                | ✅ Implemented | `src/lib/api/client.ts`, `errors.ts`                                   |
+| API auth token injection + 401 retry            | ✅ Implemented | Request interceptor + `handle401Retry` with refresh coalescing         |
+| Provider adapter contract                       | ✅ Implemented | `ApiProviderAdapter` with supabase/convex/firebase/custom shells       |
+| Secure/local persistence                        | ✅ Implemented | SecureStore + local storage wrappers                                   |
+| Query/data foundation                           | ✅ Implemented | React Query client/provider wired                                      |
+| Unit test baseline                              | ✅ Implemented | Jest configured; tests passing                                         |
+| CI verification                                 | ✅ Implemented | Lint/typecheck/test on `main` and `develop`                            |
+| Maestro flow validation in CI                   | ✅ Implemented | Syntax validation via `--dry-run` on auth + navigation flows           |
+| EAS build config                                | ✅ Implemented | Preview + production profiles                                          |
+| semantic-release automation                     | ✅ Implemented | Stable on `main`, beta on `develop`                                    |
+| Setup wizard (`pnpm run project:setup`)         | ✅ Implemented | Provider + feature selection with diff summary and env warnings        |
+| Setup managed feature pruning                   | ✅ Implemented | Disabled managed features physically removed from generated dirs       |
+| Setup CLI diff summary + env warnings           | ✅ Implemented | Shows config changes and required env vars after setup                 |
+| Setup env contract generation                   | ✅ Implemented | `buildEnvContract()` produces `requiredKeys` for selected config       |
+| Runtime env validation                          | ✅ Implemented | `validateRuntimeSetup()` at app boot, result stored in `useSetupStore` |
+| Safe degradation                                | ✅ Implemented | Noop fallback for observability when env is invalid                    |
+| Auth provider contract + lifecycle              | ✅ Implemented | `AuthProvider` with signIn/signOut/refreshSession/restoreSession       |
+| Auth error types                                | ✅ Implemented | `AuthError` with typed codes + `AuthErrorCode` union                   |
+| Auth runtime injection                          | ✅ Implemented | `getRuntimeAuthProvider()` / `setRuntimeAuthProvider()` for DI         |
+| Auth lifecycle analytics events                 | ✅ Implemented | `auth.sign_in_success`, `auth.sign_out`, `auth.token_refresh_success`  |
+| Observability provider contract                 | ✅ Implemented | `AnalyticsProvider` + `CrashProvider` typed interfaces                 |
+| Observability provider registry + noop fallback | ✅ Implemented | Falls back to noop when runtime validation fails                       |
+| Payload redaction                               | ✅ Implemented | Sensitive fields redacted from logged payloads                         |
+| i18n core                                       | ✅ Implemented | i18next + expo-localization, EN/FR resources                           |
+| User-facing text localization                   | ✅ Implemented | Core screens/components localized                                      |
+| Locale formatting helpers                       | ✅ Implemented | Date/number/currency helpers added                                     |
+| Network awareness UX                            | ✅ Implemented | Offline banner + network subscription                                  |
+| E2E smoke flows (Maestro)                       | ✅ Implemented | Auth success + tab navigation flows (CI dry-run, local full-run)       |
+| Notifications bootstrap                         | 🟡 Scaffolded  | Permission + token bootstrapping present                               |
+| Media/camera permissions                        | 🟡 Scaffolded  | Wrapper helpers added                                                  |
+| Haptics integration                             | 🟡 Scaffolded  | Wrapper helpers added                                                  |
+| Analytics vendor integration                    | 🟡 Scaffolded  | Contract exists; no real backend (Sentry/PostHog) wired                |
+| Crash vendor integration                        | 🟡 Scaffolded  | Contract exists; no real backend (Sentry/PostHog) wired                |
+| Full UI design system                           | 🟡 Partially   | Button/Input/Modal/Toast/BottomSheet present; more primitives needed   |
+| Provider starter modules                        | ⏳ Pending     | Real Supabase/Convex/Firebase auth + data examples not implemented     |
+| Security hardening                              | ⏳ Pending     | Runtime config validation, pre-commit secret checks, dep policy gate   |
+| CLI UX polish                                   | ⏳ Pending     | Non-interactive flags, `--dry-run`, JSON output mode                   |
+| Boilerplate health score                        | ⏳ Pending     | Self-diagnostic CLI + health badge                                     |
 
 ## Risks / Gaps
 
-1. **Auth is demo-only**: sign-in currently sets local demo tokens.
-2. **Observability is abstraction-only**: needs real providers (e.g. Sentry/PostHog).
-3. **Notification flow incomplete**: no backend token registration lifecycle yet.
-4. **UI kit incomplete**: only initial primitives are present.
-5. **Generated/manual boundary discipline**: manual edits must stay out of setup-owned generated paths.
+1. **Auth is demo-only**: Sign-in uses hardcoded demo tokens; no real API integration.
+2. **Observability is abstraction-only**: Needs real vendor adapters (Sentry, PostHog).
+3. **Notification flow incomplete**: No backend token registration lifecycle yet.
+4. **UI kit incomplete**: Some primitives present but not comprehensive.
+5. **Generated/manual boundary discipline**: Manual edits must stay out of setup-owned generated paths.
 
 ## Recommended Next Milestones
 
-### Milestone A — Productize auth and API integration
+### Milestone A — P1: Provider starter modules + security hardening
 
-- Add real auth endpoints and token refresh flow
-- Add protected fetch helpers and retry policy
+- Real Supabase/Convex/Firebase starter modules (auth + data example)
+- Runtime config validation at boot
+- Pre-commit secret check hooks
+- Dependency gate policy
 
-### Milestone B — Productize observability
+### Milestone B — P2: CLI UX polish + health checks
 
-- Wire analytics provider
-- Wire crash provider and source-map pipeline
+- Non-interactive flags (`--provider`, `--features`, `--yes`)
+- `--dry-run` mode (show what would change without writing)
+- JSON output mode for CI integration
+- Optional module packs / template presets
+- Boilerplate health self-diagnostic script + score
 
-### Milestone C — Expand UI system and test depth
+### Milestone C — Real provider wiring
 
-- Add modal/toast/sheet primitives and empty/error states
-- Add E2E smoke flows (auth gate + offline + navigation)
+- Wire analytics provider (PostHog or Amplitude)
+- Wire crash reporting provider (Sentry)
+- Auth backend integration (real sign-in/refresh/logout APIs)
+
+### Milestone D — UX completion
+
+- Comprehensive UI design system (data-table, picker, avatar, chip)
+- Notification delivery lifecycle
+- Permission education screens + denial recovery

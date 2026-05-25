@@ -1,14 +1,20 @@
 # rn-expo-boilerplate
 
-Expo SDK 56 boilerplate with production foundations:
+Expo SDK 56 boilerplate with contracts-first provider abstraction, setup-driven
+feature selection, auth lifecycle enforcement, and observability with safe
+degradation.
 
 - Expo Router + route groups
 - Protected routing scaffold
 - Query client (`@tanstack/react-query`)
-- API layer (`axios`) + normalized error mapping
-- Auth/session store (`zustand`) + secure token storage
+- API layer (`axios`) + normalized error mapping + auth token injection + 401 retry
+- Auth/session store (`zustand`) + secure token storage + contract lifecycle
+- Contracts-first provider adapters (Supabase, Convex, Firebase, Custom)
+- Setup wizard (`pnpm run project:setup`) for provider + feature selection
+- Runtime env contract validation with safe degradation
+- Observability provider contracts with noop fallback
 - Jest + React Native Testing Library baseline
-- CI workflow (`lint`, `typecheck`, `test`)
+- CI workflow (`lint`, `typecheck`, `test`, Maestro dry-run)
 - EAS build profiles (`preview`, `production`)
 
 ## Requirements
@@ -25,8 +31,11 @@ pnpm start
 ```
 
 `pnpm run project:setup` lets you choose one API provider (`supabase`, `convex`,
-`firebase`, or `custom`) and toggle core features. Re-running setup is safe for
-generated files.
+`firebase`, or `custom`) and toggle core features. After selection it shows:
+
+- A diff summary (what changed since last setup)
+- Required environment variables for the chosen provider + enabled features
+- Clear next steps
 
 ### Setup-managed files
 
@@ -36,6 +45,23 @@ generated files.
 - Disabled features are removed from setup-owned generated paths:
   - `src/features/generated/*`
   - `src/app/generated/*`
+
+### Generated artifacts
+
+| File                                                  | Purpose                          |
+| ----------------------------------------------------- | -------------------------------- |
+| `src/lib/setup/generated/provider-selection.ts`       | Literal type for chosen provider |
+| `src/lib/setup/generated/feature-flags.ts`            | Per-feature boolean literal      |
+| `src/lib/setup/generated/env-contract.ts`             | Required `process.env` keys      |
+| `src/lib/api/providers/generated/adapter-resolver.ts` | ApiProviderAdapter resolver      |
+
+### Runtime contracts
+
+The setup env contract is validated at app boot: `validateRuntimeSetup()` checks
+`process.env` against the generated contract. If keys are missing, observability
+falls back to no-op providers and the result is stored in `useSetupStore`.
+
+See `docs/contracts/setup-runtime-contract.md` for details.
 
 ## Scripts
 
@@ -50,11 +76,14 @@ generated files.
 
 ## E2E (Maestro)
 
-- Smoke flow: `.maestro/smoke-auth-flow.yaml`
+- Auth smoke flow: `.maestro/smoke-auth-flow.yaml`
+- Tab navigation flow: `.maestro/smoke-navigation-flow.yaml`
+- CI validates all `.maestro/*.yaml` flows via `--dry-run`
 - Run locally (after installing Maestro CLI):
 
 ```bash
 maestro test .maestro/smoke-auth-flow.yaml
+maestro test .maestro/smoke-navigation-flow.yaml
 ```
 
 ## Environment
@@ -75,66 +104,106 @@ The value is read in `src/lib/api/client.ts`.
 
 - `src/app/(public)` - public routes (e.g. sign-in)
 - `src/app/(protected)` - guarded app routes
+- `src/app/generated` - setup-managed feature route stubs
 - `src/lib/api` - API client + error utilities
+- `src/lib/api/providers` - provider adapters by vendor
+- `src/lib/auth` - auth provider contract + lifecycle + runtime injection
 - `src/lib/query` - shared query client
 - `src/lib/storage` - secure/local storage wrappers
 - `src/lib/platform` - network/notifications/haptics/media wrappers
 - `src/lib/observability` - logging, analytics, crash reporting abstractions
+- `src/lib/observability/providers` - observability contracts + registry + noop fallback
+- `src/lib/setup` - setup config schema + env contract + runtime validation
+- `src/lib/setup/generated` - setup-managed artifacts (provider-selection, flags, env-contract)
 - `src/lib/i18n` - localization, formatting, locale settings
-- `src/providers` - app-level providers
-- `src/store` - global state stores
+- `src/lib/feature-flags` - remote flags with setup-gated fetch
+- `src/providers` - app-level providers (runtime validation, query, feature flags)
+- `src/store` - global state stores (auth, app, setup)
+- `src/features/generated` - setup-managed feature stubs
+- `src/features/auth` - auth schemas and components
 
 ## Implementation status
 
 ### ✅ Implemented
 
-- Core architecture
-  - Query client and provider
-  - API client + normalized error mapping
-  - Auth store + secure token persistence
-  - App store for network state
-- Routing and auth scaffolding
+- **Contracts-first architecture**
+  - API provider adapter contract + vendor shells (supabase, convex, firebase, custom)
+  - Auth provider contract + lifecycle (signIn, signOut, refreshSession, restoreSession)
+  - Observability provider contracts (analytics + crash reporting)
+  - Runtime env contract validation at boot
+- **Setup wizard** (`pnpm run project:setup`)
+  - Interactive provider/feature selection with diff summary
+  - Env requirement warnings per provider + enabled features
+  - Env contract generation + boot-time validation
+  - Disabled managed feature code physically removed
+  - Safe reconfigure with marker detection + `.setup.bak` backup
+- **Auth system**
+  - Auth provider lifecycle (sign-in, sign-out, refresh, restore)
+  - Token persistence in SecureStore
+  - Request coalescing on token refresh
+  - Runtime auth provider injection point
+  - Auth error types (invalid_credentials, session_expired, etc.)
+  - API auth token injection + 401 retry interceptor
+- **Observability**
+  - Provider registry with noop fallback for safe degradation
+  - Analytics: trackEvent, trackScreen
+  - Crash reporting: captureException, captureMessage
+  - Payload redaction (sensitive key stripping)
+  - Auth lifecycle analytics events
+  - App error boundary
+- **Routing and auth scaffold**
   - Public/protected route groups
   - Sign-in gate and guarded protected layout
-- Developer experience
-  - Lint + typecheck + test scripts
-  - Jest baseline with module aliasing
+- **State management**
+  - `useAuthStore` + `useAppStore` + `useSetupStore` via Zustand
+  - Secure store + local storage wrappers
+- **API layer**
+  - Axios client with auth token injection
+  - 401 retry with refresh coalescing
+  - Normalized error mapping
+- **Developer experience**
+  - Lint + typecheck + test scripts passing
+  - Jest baseline with 21 test suites, all passing
   - CI workflow on `main` + `develop`
+  - Maestro flow validation in CI (auth + navigation)
   - EAS config (`preview` + `production`)
-- Release automation
-  - semantic-release on `main` (stable)
-  - semantic-release on `develop` (beta prereleases)
-  - changelog generation and GitHub release publishing
-- Observability
-  - App error boundary
-  - Analytics and crash-reporting abstraction layers
-- Localization
+- **Release automation**
+  - semantic-release on `main` (stable) and `develop` (beta prereleases)
+  - Changelog generation and GitHub release publishing
+- **Localization**
   - i18next + react-i18next + expo-localization
-  - EN/FR resources
-  - Locale date/number/currency formatting helpers
+  - EN/FR resources with locale formatting helpers
   - No hardcoded user-facing UI copy in core screens/components
-- Platform capability scaffolds
+- **Platform capability scaffolds**
   - Network subscription + offline banner
   - Notification permission + token bootstrap
   - Camera/media permissions helpers
   - Haptics wrappers
+- **UI components**
+  - Button, Input, Modal, Toast, BottomSheet, EmptyState, ErrorState, Collapsible
+- **E2E smoke flows (Maestro)**
+  - Auth success flow with form input + post-auth assertions
+  - Tab navigation flow (Home → Explore → Home)
+- **Security**
+  - Gitleaks secret scanning config
+  - Dependency audit gate in CI
+  - Security policy and runbooks
 
 ### 🟡 Partially implemented (scaffolded, not fully productized)
 
 - Notification delivery lifecycle (token sync backend, topic segmentation)
 - Permissions UX (pre-permission education screens, denial recovery flows)
 - Auth backend integration (real API login/refresh/logout)
-- Analytics vendor integration (currently abstraction + logs)
-- Crash reporting vendor integration (currently abstraction + logs)
+- Analytics vendor integration (contract exists, no real provider wired)
+- Crash reporting vendor integration (contract exists, no real provider wired)
 
 ### ⏳ Still pending (recommended next)
 
-- Full design system primitives (modal, toast, bottom sheet, empty/error states)
-- E2E tests (Detox or Maestro)
-- Remote feature flags
-- API retry/backoff/circuit breaker strategy
-- Security hardening pass (secret scanning + stricter headers/config)
-- Production runbooks and incident docs
+- Provider starter modules (real Supabase/Convex/Firebase auth + data examples)
+- Security hardening (runtime config validation, pre-commit secret checks)
+- CLI UX polish (non-interactive flags, `--dry-run`, JSON output)
+- Boilerplate health self-diagnostic script + score
+- Optional module packs / template presets
 
 See `docs/project-health.md` for a fuller status matrix.
 
