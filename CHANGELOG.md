@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/jullury/rn-expo-boilerplate/compare/v1.0.0...v1.0.1) (2026-05-25)
+
+### Bug Fixes
+
+- **ci:** correct workflow CLI arguments ([b1327b6](https://github.com/jullury/rn-expo-boilerplate/commit/b1327b6a2f1a3a1b3e882cf93440688d9f43c22c))
+
 # 1.0.0 (2026-05-25)
 
 ### Bug Fixes
