@@ -14,6 +14,7 @@ User intent:
 - User chooses one API provider from `supabase`, `convex`, `firebase`, or `other`.
 - User chooses feature toggles to enable/disable.
 - Re-running setup should be safe (reconfigure managed outputs only).
+- Disabled feature code should not exist in the repo after setup.
 
 ## 2) Goals and Non-Goals
 
@@ -30,12 +31,14 @@ User intent:
 - Keep app code provider-agnostic via a stable adapter interface.
 - Implement safe reconfigure behavior on repeated setup runs.
 - Generate a custom provider adapter stub when `other` is selected.
+- Ensure disabled feature modules are absent from repository paths owned by setup.
 
 ### Non-Goals
 
 - Runtime provider switching inside a running app.
 - Automatic deletion of unused provider implementations/dependencies.
 - Full backend integration for every provider in this step.
+- Preserving disabled managed feature source code in generated setup-owned paths.
 
 ## 3) Decisions Made
 
@@ -99,6 +102,8 @@ Runtime reads generated TypeScript artifacts derived from this state.
 - `src/lib/setup/generated/feature-flags.ts`
 - `src/lib/api/providers/generated/adapter-resolver.ts`
 - `src/lib/api/providers/custom/*` (when `other` selected)
+- `src/features/generated/*` (feature-owned generated modules for enabled features only)
+- `src/app/generated/*` (generated feature route/registration files for enabled features only)
 
 Managed files include a header marker:
 
@@ -111,6 +116,13 @@ Managed files include a header marker:
 - Feature modules consuming adapter + feature flag exports
 
 Setup must not modify handwritten files outside managed boundaries.
+
+### 6.3 Feature Code Presence Policy (Strict)
+
+- Disabled features must have no managed feature code present after setup.
+- Setup may remove disabled feature folders/files under managed generated paths.
+- Handwritten code must not live in generated setup-owned paths.
+- If managed files are changed without marker expectations, setup uses backup/confirm safeguards.
 
 ## 7) Safe Reconfigure Policy
 
@@ -126,6 +138,10 @@ On re-run:
    - update generated resolver to new active provider
    - keep old provider files intact (non-destructive)
    - print cleanup suggestions for potentially unused deps/files
+5. If feature toggles change:
+   - enable: generate managed files for that feature
+   - disable: remove managed files for that feature so disabled code is absent in setup-owned paths
+   - if marker/ownership checks fail, create `*.setup.bak` and require confirmation
 
 ## 8) Validation and Error Handling
 
@@ -156,6 +172,8 @@ Use zod (or existing validation stack) for:
 - Re-run updates managed files only.
 - `other` provider generates custom adapter stub.
 - Marker-missing path triggers backup + skip/confirm flow.
+- Disabling a feature removes its managed code directories/files.
+- Re-enabling a feature recreates only its managed directories/files.
 
 ### Project Verification
 
@@ -193,6 +211,7 @@ Use zod (or existing validation stack) for:
 - `app.setup.json` and generated files are created/updated consistently.
 - Selecting `other` creates a custom adapter stub with TODOs.
 - Re-running setup safely reconfigures without destructive edits to handwritten files.
+- Disabled features have no managed feature code present in the repository after setup.
 - Resolver routes app calls through active adapter.
 - Lint, typecheck, and tests pass after implementation.
 
