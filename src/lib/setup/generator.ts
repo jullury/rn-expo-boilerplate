@@ -2,6 +2,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { GENERATED_MARKER } from "@/lib/setup/constants";
+import { buildEnvContract } from "@/lib/setup/env-contract";
 import {
   backupManagedFile,
   shouldOverwriteManagedFile,
@@ -29,6 +30,17 @@ export const selectedProvider = ${JSON.stringify(config.provider)} as const;
 function featureFlagsContent(config: SetupConfig) {
   return `${GENERATED_MARKER}
 export const setupEnabledFeatures = ${JSON.stringify(config.features, null, 2)} as const;
+`;
+}
+
+function envContractContent(config: SetupConfig) {
+  const contract = buildEnvContract({
+    provider: config.provider,
+    features: config.features,
+  });
+
+  return `${GENERATED_MARKER}
+export const setupEnvContract = ${JSON.stringify(contract, null, 2)} as const;
 `;
 }
 
@@ -120,6 +132,11 @@ export async function generateManagedArtifacts(
   const featureFlagsFile = path.join(setupGeneratedDir, "feature-flags.ts");
   if (await writeManagedFile(featureFlagsFile, featureFlagsContent(config))) {
     created.push("src/lib/setup/generated/feature-flags.ts");
+  }
+
+  const envContractFile = path.join(setupGeneratedDir, "env-contract.ts");
+  if (await writeManagedFile(envContractFile, envContractContent(config))) {
+    created.push("src/lib/setup/generated/env-contract.ts");
   }
 
   const adapterResolverFile = path.join(

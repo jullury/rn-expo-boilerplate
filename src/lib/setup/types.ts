@@ -20,3 +20,7 @@ export type SetupConfig = {
   provider: SetupProvider;
   features: SetupFeatures;
 };
+
+export type SetupEnvContract = {
+  requiredKeys: string[];
+};
