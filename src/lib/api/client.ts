@@ -1,5 +1,6 @@
 import { create, type AxiosRequestConfig } from "axios";
 
+import { resolveApiProviderAdapter } from "@/lib/api/providers/generated/adapter-resolver";
 import { incrementMetric } from "@/lib/observability/metrics";
 
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
@@ -45,6 +46,8 @@ export const apiClient = create({
     Accept: "application/json",
   },
 });
+
+export const activeApiProviderAdapter = resolveApiProviderAdapter();
 
 apiClient.interceptors.request.use((config) => {
   if (isCircuitOpen()) {
