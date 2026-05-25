@@ -57,7 +57,7 @@ describe("project:health script", () => {
         "utf8",
       );
 
-      const { stdout } = await execFileAsync("node", [healthScript], {
+      const { stdout } = await execFileAsync("node", [healthScript, "--json"], {
         cwd: tempDir,
       });
       const payload = JSON.parse(stdout) as {
@@ -86,7 +86,7 @@ describe("project:health script", () => {
 
     try {
       try {
-        await execFileAsync("node", [healthScript], { cwd: tempDir });
+        await execFileAsync("node", [healthScript, "--json"], { cwd: tempDir });
         throw new Error("Expected health script to fail");
       } catch (error) {
         const e = error as { stdout?: string };
@@ -168,6 +168,65 @@ describe("project:health script", () => {
       };
       expect(payload.schemaVersion).toBe(2);
       expect(payload.score).toBe(100);
+    } finally {
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("prints human-readable summary by default", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "setup-health-"));
+
+    try {
+      await mkdir(path.join(tempDir, "src/lib/setup/generated"), {
+        recursive: true,
+      });
+      await writeFile(
+        path.join(tempDir, "app.setup.json"),
+        JSON.stringify({ version: 1 }, null, 2),
+        "utf8",
+      );
+      await writeFile(
+        path.join(tempDir, "src/lib/setup/generated/provider-selection.ts"),
+        "export const selectedProvider = 'supabase' as const;\n",
+        "utf8",
+      );
+      await writeFile(
+        path.join(tempDir, "src/lib/setup/generated/feature-flags.ts"),
+        "export const setupEnabledFeatures = {};\n",
+        "utf8",
+      );
+      await writeFile(
+        path.join(tempDir, "src/lib/setup/generated/env-contract.ts"),
+        "export const setupEnvContract = { requiredKeys: [] } as const;\n",
+        "utf8",
+      );
+      await mkdir(path.join(tempDir, ".github/workflows"), { recursive: true });
+      await writeFile(
+        path.join(tempDir, ".github/workflows/security.yml"),
+        "name: Security\n",
+        "utf8",
+      );
+      await writeFile(
+        path.join(tempDir, "package.json"),
+        JSON.stringify(
+          {
+            scripts: {
+              "project:setup": "node ./scripts/setup.mjs",
+              "project:health": "node ./scripts/health.mjs",
+            },
+          },
+          null,
+          2,
+        ),
+        "utf8",
+      );
+
+      const { stdout } = await execFileAsync("node", [healthScript], {
+        cwd: tempDir,
+      });
+      expect(stdout).toContain("Project Health");
+      expect(stdout).toContain("Score");
+      expect(stdout).toContain("Checks");
     } finally {
       await rm(tempDir, { recursive: true, force: true });
     }

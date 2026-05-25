@@ -157,9 +157,31 @@ function printHelp() {
   console.log("Usage: node ./scripts/health.mjs [options]");
   console.log("");
   console.log("Options:");
-  console.log("  --json                   Emit machine-readable JSON output (default)");
+  console.log("  --json                   Emit machine-readable JSON output");
   console.log("  --output-file <path>     Write JSON output to file");
   console.log("  --help, -h               Show this help output");
+}
+
+function printHumanSummary(payload) {
+  const status = payload.score === 100 ? "healthy" : "attention_needed";
+  console.log("\nProject Health\n");
+  console.log(` Status: ${status}`);
+  console.log(` Score : ${payload.score}/100`);
+  console.log(` Checks: ${payload.passed}/${payload.total} passing\n`);
+
+  console.log(" Checks:");
+  for (const check of payload.checks) {
+    const mark = check.ok ? "[OK]" : "[!!]";
+    console.log(`  ${mark} ${check.key} (weight ${check.weight})`);
+  }
+
+  if (payload.recommendations.length > 0) {
+    console.log("\n Recommendations:");
+    for (const rec of payload.recommendations) {
+      console.log(`  - [${rec.severity}] ${rec.check}: ${rec.recommendation}`);
+    }
+  }
+  console.log("");
 }
 
 async function main() {
@@ -198,11 +220,17 @@ async function main() {
     recommendations,
   };
 
-  const json = JSON.stringify(payload, null, 2);
-  if (options.outputFile) {
-    await writeFile(options.outputFile, `${json}\n`, "utf8");
+  const jsonMode = options.json || Boolean(options.outputFile);
+
+  if (jsonMode) {
+    const json = JSON.stringify(payload, null, 2);
+    if (options.outputFile) {
+      await writeFile(options.outputFile, `${json}\n`, "utf8");
+    } else {
+      console.log(json);
+    }
   } else {
-    console.log(json);
+    printHumanSummary(payload);
   }
 
   if (score < 100) {
