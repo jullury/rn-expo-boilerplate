@@ -10,7 +10,7 @@ const PROVIDER_ENV_KEYS = {
 };
 
 const FEATURE_ENV_KEYS = {
-  analytics: ["EXPO_PUBLIC_FLAGS_ENDPOINT"],
+  analytics: ["EXPO_PUBLIC_FLAGS_ENDPOINT", "EXPO_PUBLIC_POSTHOG_API_KEY"],
   errorReporting: ["EXPO_PUBLIC_SENTRY_DSN"],
 };
 

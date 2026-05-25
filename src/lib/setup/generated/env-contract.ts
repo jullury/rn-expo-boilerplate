@@ -2,6 +2,7 @@
 export const setupEnvContract = {
   requiredKeys: [
     "EXPO_PUBLIC_FLAGS_ENDPOINT",
+    "EXPO_PUBLIC_POSTHOG_API_KEY",
     "EXPO_PUBLIC_SENTRY_DSN",
     "EXPO_PUBLIC_SUPABASE_ANON_KEY",
     "EXPO_PUBLIC_SUPABASE_URL",

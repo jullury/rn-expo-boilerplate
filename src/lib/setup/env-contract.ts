@@ -17,7 +17,7 @@ const providerRequiredKeys: Record<SetupProvider, string[]> = {
 };
 
 const featureRequiredKeys: Partial<Record<keyof SetupFeatures, string[]>> = {
-  analytics: ["EXPO_PUBLIC_FLAGS_ENDPOINT"],
+  analytics: ["EXPO_PUBLIC_FLAGS_ENDPOINT", "EXPO_PUBLIC_POSTHOG_API_KEY"],
   errorReporting: ["EXPO_PUBLIC_SENTRY_DSN"],
 };
 
