@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const CHECKS = [
@@ -113,7 +113,62 @@ async function evaluateCheck(check, cwd, packageScripts) {
   };
 }
 
+function getSeverity(weight) {
+  if (weight >= 15) return "critical";
+  if (weight >= 10) return "high";
+  if (weight >= 5) return "medium";
+  return "low";
+}
+
+function parseArgs(argv) {
+  const options = {
+    json: false,
+    outputFile: undefined,
+    help: false,
+  };
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === "--json") {
+      options.json = true;
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      options.help = true;
+      continue;
+    }
+    if (arg === "--output-file") {
+      if (!argv[i + 1] || argv[i + 1].startsWith("--")) {
+        throw new Error("Missing value for --output-file");
+      }
+      options.outputFile = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    if (arg.startsWith("--")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+  }
+
+  return options;
+}
+
+function printHelp() {
+  console.log("Usage: node ./scripts/health.mjs [options]");
+  console.log("");
+  console.log("Options:");
+  console.log("  --json                   Emit machine-readable JSON output (default)");
+  console.log("  --output-file <path>     Write JSON output to file");
+  console.log("  --help, -h               Show this help output");
+}
+
 async function main() {
+  const options = parseArgs(process.argv.slice(2));
+  if (options.help) {
+    printHelp();
+    return;
+  }
+
   const cwd = process.cwd();
   const packageScripts = await loadPackageScripts(cwd);
   const checks = await Promise.all(
@@ -128,7 +183,11 @@ async function main() {
   );
   const recommendations = checks
     .filter((check) => !check.ok)
-    .map((check) => check.recommendation);
+    .map((check) => ({
+      check: check.key,
+      severity: getSeverity(check.weight),
+      recommendation: check.recommendation,
+    }));
 
   const payload = {
     schemaVersion: 2,
@@ -139,7 +198,12 @@ async function main() {
     recommendations,
   };
 
-  console.log(JSON.stringify(payload, null, 2));
+  const json = JSON.stringify(payload, null, 2);
+  if (options.outputFile) {
+    await writeFile(options.outputFile, `${json}\n`, "utf8");
+  } else {
+    console.log(json);
+  }
 
   if (score < 100) {
     process.exit(1);

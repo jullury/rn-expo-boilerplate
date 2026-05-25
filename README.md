@@ -238,6 +238,28 @@ To trigger a release, merge commit(s) with conventional commit messages
 - Security policy: `SECURITY.md`
 - Dependency audit gate: `.github/workflows/security.yml`
 
+## Project health
+
+Run a quick health diagnostic for setup/runtime scaffolding:
+
+```bash
+pnpm run project:health
+```
+
+Machine-readable output options:
+
+```bash
+pnpm run project:health -- --json
+pnpm run project:health -- --json --output-file health-report.json
+```
+
+Health output includes:
+
+- weighted score (`0-100`)
+- pass/fail count
+- individual checks
+- severity-tagged recommendations when checks fail
+
 ## Runbooks
 
 - `docs/runbooks/production-release.md`
