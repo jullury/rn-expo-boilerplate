@@ -71,7 +71,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "setup": "node ./scripts/setup.mjs",
+    "project:setup": "node ./scripts/setup.mjs",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "jest",

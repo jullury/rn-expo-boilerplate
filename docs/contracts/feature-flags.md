@@ -4,7 +4,7 @@ Endpoint is configured by `EXPO_PUBLIC_FLAGS_ENDPOINT`.
 
 The remote flag request is gated by setup-generated feature config at
 `src/lib/setup/generated/feature-flags.ts`. If `analytics` is disabled by
-`pnpm setup`, the app skips remote flag fetching and uses local defaults.
+`pnpm run project:setup`, the app skips remote flag fetching and uses local defaults.
 
 ## Response schema
 

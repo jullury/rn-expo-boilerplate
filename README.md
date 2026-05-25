@@ -20,11 +20,11 @@ Expo SDK 56 boilerplate with production foundations:
 
 ```bash
 pnpm install
-pnpm setup
+pnpm run project:setup
 pnpm start
 ```
 
-`pnpm setup` lets you choose one API provider (`supabase`, `convex`,
+`pnpm run project:setup` lets you choose one API provider (`supabase`, `convex`,
 `firebase`, or `custom`) and toggle core features. Re-running setup is safe for
 generated files.
 
@@ -46,7 +46,7 @@ generated files.
 - `pnpm lint` - run Expo ESLint config
 - `pnpm typecheck` - run TypeScript checks
 - `pnpm test` - run Jest tests
-- `pnpm setup` - interactive provider/feature configuration
+- `pnpm run project:setup` - interactive provider/feature configuration
 
 ## E2E (Maestro)
 
