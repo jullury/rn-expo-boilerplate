@@ -10,7 +10,7 @@ This Expo boilerplate already includes production-focused foundations (auth scaf
 
 User intent:
 
-- After clone, user runs `pnpm setup`.
+- After clone, user runs `pnpm run project:setup`.
 - User chooses one API provider from `supabase`, `convex`, `firebase`, or `other`.
 - User chooses feature toggles to enable/disable.
 - Re-running setup should be safe (reconfigure managed outputs only).
@@ -20,7 +20,7 @@ User intent:
 
 ### Goals
 
-- Provide an interactive `pnpm setup` wizard for initial project configuration.
+- Provide an interactive `pnpm run project:setup` wizard for initial project configuration.
 - Support exactly one active API provider at a time.
 - Support feature toggles for:
   - auth
@@ -42,7 +42,7 @@ User intent:
 
 ## 3) Decisions Made
 
-1. Setup command name: `pnpm setup`.
+1. Setup command name: `pnpm run project:setup`.
 2. “Other” provider behavior: generate a template adapter stub.
 3. Provider selection mode: exclusive (one provider only).
 4. Feature menu: core set (auth, analytics, error-reporting, push-notifications, payments).
@@ -66,7 +66,7 @@ Application features consume the adapter contract only, not provider SDKs direct
 
 ### 4.2 Setup-Driven Configuration
 
-`pnpm setup` is the source of setup intent and writes canonical setup state into:
+`pnpm run project:setup` is the source of setup intent and writes canonical setup state into:
 
 - `app.setup.json`
 
@@ -187,7 +187,7 @@ Use zod (or existing validation stack) for:
 
 - Post-clone flow:
   1. `pnpm install`
-  2. `pnpm setup`
+  2. `pnpm run project:setup`
 - Provider-specific env guidance.
 - Reconfigure explanation and managed-file rules.
 
@@ -207,7 +207,7 @@ Use zod (or existing validation stack) for:
 
 ## 12) Acceptance Criteria
 
-- Running `pnpm setup` allows selecting one provider and core feature toggles.
+- Running `pnpm run project:setup` allows selecting one provider and core feature toggles.
 - `app.setup.json` and generated files are created/updated consistently.
 - Selecting `other` creates a custom adapter stub with TODOs.
 - Re-running setup safely reconfigures without destructive edits to handwritten files.

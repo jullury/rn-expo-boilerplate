@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Add a post-clone `pnpm setup` wizard that selects exactly one API provider and enabled features, generates managed files, and removes disabled managed feature code.
+**Goal:** Add a post-clone `pnpm run project:setup` wizard that selects exactly one API provider and enabled features, generates managed files, and removes disabled managed feature code.
 
 **Architecture:** Add a setup CLI (`scripts/setup.mjs`) that writes `app.setup.json` and generated TS files under setup-owned folders. Runtime code reads generated provider/feature artifacts through a stable adapter interface, while setup re-runs only mutate managed files and remove disabled managed feature modules.
 
@@ -300,7 +300,7 @@ git add src/lib/api/client.ts src/lib/feature-flags/client.ts src/providers/app-
 git commit -m "feat(runtime): wire app to setup-generated provider and features"
 ```
 
-### Task 7: Add CLI interaction flow for `pnpm setup`
+### Task 7: Add CLI interaction flow for `pnpm run project:setup`
 
 **Files:**
 
@@ -396,7 +396,7 @@ git commit -m "feat(api): generate custom provider adapter stub"
 
 Checklist:
 
-- README includes `pnpm install && pnpm setup`
+- README includes `pnpm install && pnpm run project:setup`
 - explains managed-file marker and reconfigure behavior
 - states disabled managed features are removed
 
@@ -431,9 +431,9 @@ git commit -m "docs(setup): document setup flow and managed feature removal"
 
 Run:
 
-- `pnpm setup` (choose supabase)
-- `pnpm setup` (choose firebase)
-- `pnpm setup` (choose other)
+- `pnpm run project:setup` (choose supabase)
+- `pnpm run project:setup` (choose firebase)
+- `pnpm run project:setup` (choose other)
 
 Expected:
 
