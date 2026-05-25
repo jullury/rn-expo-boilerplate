@@ -23,13 +23,18 @@ const FEATURE_TO_DIR: Record<keyof SetupConfig["features"], string> = {
 
 function providerSelectionContent(config: SetupConfig) {
   return `${GENERATED_MARKER}
-export const selectedProvider = ${JSON.stringify(config.provider)} as const;
+export const selectedProvider = "${config.provider}" as const;
 `;
 }
 
 function featureFlagsContent(config: SetupConfig) {
+  const lines = Object.entries(config.features).map(
+    ([key, val]) => `  ${key}: ${val},`,
+  );
   return `${GENERATED_MARKER}
-export const setupEnabledFeatures = ${JSON.stringify(config.features, null, 2)} as const;
+export const setupEnabledFeatures = {
+${lines.join("\n")}
+} as const;
 `;
 }
 
@@ -40,7 +45,9 @@ function envContractContent(config: SetupConfig) {
   });
 
   return `${GENERATED_MARKER}
-export const setupEnvContract = ${JSON.stringify(contract, null, 2)} as const;
+export const setupEnvContract = {
+  requiredKeys: [${contract.requiredKeys.map((k) => `"${k}"`).join(", ")}],
+} as const;
 `;
 }
 

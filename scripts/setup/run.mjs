@@ -15,6 +15,28 @@ const defaultConfig = {
   },
 };
 
+const PROVIDER_ENV_KEYS = {
+  supabase: ["EXPO_PUBLIC_API_URL"],
+  convex: ["EXPO_PUBLIC_API_URL"],
+  firebase: ["EXPO_PUBLIC_API_URL"],
+  custom: ["EXPO_PUBLIC_API_URL"],
+};
+
+const FEATURE_ENV_KEYS = {
+  analytics: ["EXPO_PUBLIC_FLAGS_ENDPOINT"],
+};
+
+function buildEnvKeys(provider, features) {
+  const keys = new Set(PROVIDER_ENV_KEYS[provider] ?? []);
+  for (const [feature, enabled] of Object.entries(features)) {
+    if (!enabled) continue;
+    for (const key of FEATURE_ENV_KEYS[feature] ?? []) {
+      keys.add(key);
+    }
+  }
+  return Array.from(keys).sort();
+}
+
 const featureToDir = {
   auth: "auth",
   analytics: "analytics",
@@ -66,12 +88,20 @@ export async function runSetup({ rootDir = process.cwd(), prompts }) {
 
   await writeManagedFile(
     path.join(setupGeneratedDir, "provider-selection.ts"),
-    `${GENERATED_MARKER}\nexport const selectedProvider = ${JSON.stringify(provider)} as const;\n`,
+    `${GENERATED_MARKER}\nexport const selectedProvider = "${provider}" as const;\n`,
   );
 
+  const featureLines = Object.entries(features)
+    .map(([k, v]) => `  ${k}: ${v},`);
   await writeManagedFile(
     path.join(setupGeneratedDir, "feature-flags.ts"),
-    `${GENERATED_MARKER}\nexport const setupEnabledFeatures = ${JSON.stringify(features, null, 2)} as const;\n`,
+    `${GENERATED_MARKER}\nexport const setupEnabledFeatures = {\n${featureLines.join("\n")}\n} as const;\n`,
+  );
+
+  const envKeys = buildEnvKeys(provider, features);
+  await writeManagedFile(
+    path.join(setupGeneratedDir, "env-contract.ts"),
+    `${GENERATED_MARKER}\nexport const setupEnvContract = {\n  requiredKeys: [${envKeys.map((k) => `"${k}"`).join(", ")}],\n} as const;\n`,
   );
 
   await writeManagedFile(
