@@ -130,4 +130,48 @@ describe("project:setup CLI flags", () => {
     expect(stdout).toContain("--json");
     expect(stdout).toContain("--root-dir");
   });
+
+  it("supports --output-file for JSON output", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "setup-flags-"));
+    const outFile = path.join(tempDir, "setup-output.json");
+
+    try {
+      await execFileAsync(
+        "node",
+        [
+          setupScript,
+          "--yes",
+          "--dry-run",
+          "--json",
+          "--output-file",
+          outFile,
+          "--provider",
+          "supabase",
+        ],
+        { cwd: tempDir },
+      );
+
+      const payload = JSON.parse(await readFile(outFile, "utf8")) as {
+        schemaVersion: number;
+        mode: string;
+      };
+
+      expect(payload.schemaVersion).toBe(1);
+      expect(payload.mode).toBe("dry-run");
+    } finally {
+      await rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("fails on unknown flags", async () => {
+    await expect(
+      execFileAsync("node", [setupScript, "--unknown-flag"]),
+    ).rejects.toThrow("Unknown argument");
+  });
+
+  it("fails when required flag value is missing", async () => {
+    await expect(
+      execFileAsync("node", [setupScript, "--provider"]),
+    ).rejects.toThrow("Missing value for --provider");
+  });
 });

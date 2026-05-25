@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { writeFile } from "node:fs/promises";
 import { printSetupSummary } from "./setup/output.mjs";
 import { selectFeatures, selectProvider } from "./setup/prompts.mjs";
 import { runSetup } from "./setup/run.mjs";
@@ -18,6 +19,7 @@ function parseArgs(argv) {
     provider: undefined,
     features: undefined,
     rootDir: undefined,
+    outputFile: undefined,
     yes: false,
     dryRun: false,
     json: false,
@@ -43,19 +45,40 @@ function parseArgs(argv) {
       continue;
     }
     if (arg === "--provider") {
+      if (!argv[i + 1] || argv[i + 1].startsWith("--")) {
+        throw new Error("Missing value for --provider");
+      }
       options.provider = argv[i + 1];
       i += 1;
       continue;
     }
     if (arg === "--features") {
+      if (!argv[i + 1] || argv[i + 1].startsWith("--")) {
+        throw new Error("Missing value for --features");
+      }
       options.features = argv[i + 1];
       i += 1;
       continue;
     }
     if (arg === "--root-dir") {
+      if (!argv[i + 1] || argv[i + 1].startsWith("--")) {
+        throw new Error("Missing value for --root-dir");
+      }
       options.rootDir = argv[i + 1];
       i += 1;
       continue;
+    }
+    if (arg === "--output-file") {
+      if (!argv[i + 1] || argv[i + 1].startsWith("--")) {
+        throw new Error("Missing value for --output-file");
+      }
+      options.outputFile = argv[i + 1];
+      i += 1;
+      continue;
+    }
+
+    if (arg.startsWith("--")) {
+      throw new Error(`Unknown argument: ${arg}`);
     }
   }
 
@@ -72,6 +95,7 @@ function printHelp() {
   console.log("  --dry-run                Compute and print result without writing files");
   console.log("  --json                   Emit machine-readable JSON summary");
   console.log("  --root-dir <path>        Target project directory (default: cwd)");
+  console.log("  --output-file <path>     Write JSON output to file (requires --json)");
   console.log("  --help, -h               Show this help output");
 }
 
@@ -112,6 +136,10 @@ function validateOptions(options) {
         `Invalid --features value(s): ${invalid.join(", ")}. Expected subset of: ${SUPPORTED_FEATURES.join(", ")}`,
       );
     }
+  }
+
+  if (options.outputFile && !options.json) {
+    throw new Error("--output-file requires --json");
   }
 }
 
@@ -161,7 +189,12 @@ async function main() {
       mode: options.dryRun ? "dry-run" : "apply",
       ...buildSetupSummary(next, previous),
     };
-    console.log(JSON.stringify(payload, null, 2));
+    const json = JSON.stringify(payload, null, 2);
+    if (options.outputFile) {
+      await writeFile(options.outputFile, `${json}\n`, "utf8");
+    } else {
+      console.log(json);
+    }
     return;
   }
 
