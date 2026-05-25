@@ -1,3 +1,4 @@
+export * from "@/lib/platform/bootstrap";
 export * from "@/lib/platform/haptics";
 export * from "@/lib/platform/media";
 export * from "@/lib/platform/network";

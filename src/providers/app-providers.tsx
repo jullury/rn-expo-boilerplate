@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { PropsWithChildren, useEffect } from "react";
 
 import { initI18n } from "@/lib/i18n";
+import { bootstrapPlatformCapabilities } from "@/lib/platform/bootstrap";
 import { subscribeNetworkState } from "@/lib/platform/network";
 import { queryClient } from "@/lib/query/query-client";
 import { useAppStore } from "@/store/app-store";
@@ -11,6 +12,7 @@ export function AppProviders({ children }: PropsWithChildren) {
 
   useEffect(() => {
     void initI18n();
+    void bootstrapPlatformCapabilities();
   }, []);
 
   useEffect(() => {
