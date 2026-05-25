@@ -50,6 +50,7 @@ The value is read in `src/lib/api/client.ts`.
 - `src/lib/api` - API client + error utilities
 - `src/lib/query` - shared query client
 - `src/lib/storage` - secure/local storage wrappers
+- `src/lib/platform` - network/notifications/haptics/media wrappers
 - `src/providers` - app-level providers
 - `src/store` - global state stores
 
