@@ -49,6 +49,9 @@ Set public API URL for the shared API client:
 ```bash
 EXPO_PUBLIC_API_URL=https://api.example.com
 EXPO_PUBLIC_FLAGS_ENDPOINT=/feature-flags
+
+Feature flags response contract is documented at
+`docs/contracts/feature-flags.md`.
 ```
 
 The value is read in `src/lib/api/client.ts`.
@@ -147,6 +150,8 @@ To trigger a release, merge commit(s) with conventional commit messages
 
 - Secret scanning workflow: `.github/workflows/security.yml`
 - Gitleaks baseline config: `.gitleaks.toml`
+- Security policy: `SECURITY.md`
+- Dependency audit gate: `.github/workflows/security.yml`
 
 ## Runbooks
 

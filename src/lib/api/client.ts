@@ -1,5 +1,7 @@
 import { create, type AxiosRequestConfig } from "axios";
 
+import { incrementMetric } from "@/lib/observability/metrics";
+
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 const MAX_RETRIES = 3;
 const BASE_RETRY_DELAY_MS = 300;
@@ -26,6 +28,7 @@ function isCircuitOpen() {
   }
 
   if (Date.now() - circuit.openedAt > CIRCUIT_COOLDOWN_MS) {
+    incrementMetric("api.circuit.closed");
     circuit.openedAt = null;
     circuit.failureCount = 0;
     return false;
@@ -45,6 +48,7 @@ export const apiClient = create({
 
 apiClient.interceptors.request.use((config) => {
   if (isCircuitOpen()) {
+    incrementMetric("api.circuit.rejected");
     return Promise.reject(new Error("Circuit breaker is open"));
   }
 
@@ -53,11 +57,13 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => {
+    incrementMetric("api.request.success");
     circuit.failureCount = 0;
     circuit.openedAt = null;
     return response;
   },
   async (error) => {
+    incrementMetric("api.request.error");
     const config = error.config as
       | (AxiosRequestConfig & { __retryCount?: number })
       | undefined;
@@ -66,7 +72,9 @@ apiClient.interceptors.response.use(
     const retryable = !status || RETRYABLE_STATUS.has(status);
     if (!config || !retryable) {
       circuit.failureCount += 1;
+      incrementMetric("api.retry.skipped");
       if (circuit.failureCount >= CIRCUIT_FAILURE_THRESHOLD) {
+        incrementMetric("api.circuit.opened");
         circuit.openedAt = Date.now();
       }
       return Promise.reject(error);
@@ -75,13 +83,16 @@ apiClient.interceptors.response.use(
     const retryCount = config.__retryCount ?? 0;
     if (retryCount >= MAX_RETRIES) {
       circuit.failureCount += 1;
+      incrementMetric("api.retry.maxed");
       if (circuit.failureCount >= CIRCUIT_FAILURE_THRESHOLD) {
+        incrementMetric("api.circuit.opened");
         circuit.openedAt = Date.now();
       }
       return Promise.reject(error);
     }
 
     config.__retryCount = retryCount + 1;
+    incrementMetric("api.retry.attempt");
     const backoffDelay = BASE_RETRY_DELAY_MS * 2 ** retryCount;
     await sleep(backoffDelay);
     return apiClient(config);

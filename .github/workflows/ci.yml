@@ -37,3 +37,15 @@ jobs:
 
       - name: Test
         run: pnpm test -- --runInBand
+
+  maestro-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Maestro CLI
+        run: curl -Ls "https://get.maestro.mobile.dev" | bash
+
+      - name: Validate Maestro flow syntax
+        run: ~/.maestro/bin/maestro test --dry-run .maestro/smoke-auth-flow.yaml
