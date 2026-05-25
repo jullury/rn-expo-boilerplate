@@ -1,0 +1,7 @@
+appId: host.exp.Exponent
+name: Smoke Auth Flow
+---
+- launchApp
+- assertVisible: "Sign in"
+- tapOn: "Continue with demo session"
+- assertVisible: "Explore"

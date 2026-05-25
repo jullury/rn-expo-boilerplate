@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow demo placeholders"
+paths = [
+  '''docs/''',
+  '''CHANGELOG.md'''
+]

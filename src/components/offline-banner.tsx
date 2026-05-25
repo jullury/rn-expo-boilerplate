@@ -3,16 +3,18 @@ import { useTranslation } from "react-i18next";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { useFeatureFlags } from "@/lib/feature-flags/provider";
 import { useThemeTokens } from "@/hooks/use-theme-tokens";
 import { useAppStore } from "@/store/app-store";
 import { primitives } from "@/theme";
 
 export function OfflineBanner() {
   const isOnline = useAppStore((state) => state.isOnline);
+  const flags = useFeatureFlags();
   const { semantic } = useThemeTokens();
   const { t } = useTranslation("common");
 
-  if (isOnline) {
+  if (isOnline || !flags.enableOfflineBanner) {
     return null;
   }
 

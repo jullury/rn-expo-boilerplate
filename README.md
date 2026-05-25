@@ -33,12 +33,22 @@ pnpm start
 - `pnpm typecheck` - run TypeScript checks
 - `pnpm test` - run Jest tests
 
+## E2E (Maestro)
+
+- Smoke flow: `.maestro/smoke-auth-flow.yaml`
+- Run locally (after installing Maestro CLI):
+
+```bash
+maestro test .maestro/smoke-auth-flow.yaml
+```
+
 ## Environment
 
 Set public API URL for the shared API client:
 
 ```bash
 EXPO_PUBLIC_API_URL=https://api.example.com
+EXPO_PUBLIC_FLAGS_ENDPOINT=/feature-flags
 ```
 
 The value is read in `src/lib/api/client.ts`.
@@ -132,3 +142,13 @@ Release automation files:
 
 To trigger a release, merge commit(s) with conventional commit messages
 (`feat:`, `fix:`, etc.) into `main` or `develop`.
+
+## Security hardening
+
+- Secret scanning workflow: `.github/workflows/security.yml`
+- Gitleaks baseline config: `.gitleaks.toml`
+
+## Runbooks
+
+- `docs/runbooks/production-release.md`
+- `docs/runbooks/incident-response.md`

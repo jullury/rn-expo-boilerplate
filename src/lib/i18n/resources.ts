@@ -4,6 +4,8 @@ export const resources = {
       appErrorTitle: "Something went wrong",
       learnMore: "Learn more",
       offline: "You are offline",
+      close: "Close",
+      retry: "Retry",
     },
     tabs: {
       home: "Home",
@@ -68,6 +70,8 @@ export const resources = {
       appErrorTitle: "Une erreur est survenue",
       learnMore: "En savoir plus",
       offline: "Vous êtes hors ligne",
+      close: "Fermer",
+      retry: "Réessayer",
     },
     tabs: {
       home: "Accueil",
