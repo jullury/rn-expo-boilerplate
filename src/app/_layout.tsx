@@ -3,6 +3,7 @@ import { useColorScheme } from "react-native";
 
 import { AppErrorBoundary } from "@/components/app-error-boundary";
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import { OfflineBanner } from "@/components/offline-banner";
 import { AppProviders } from "@/providers/app-providers";
 
 export default function TabLayout() {
@@ -12,6 +13,7 @@ export default function TabLayout() {
       <AppErrorBoundary>
         <AppProviders>
           <AnimatedSplashOverlay />
+          <OfflineBanner />
           <Slot />
         </AppProviders>
       </AppErrorBoundary>

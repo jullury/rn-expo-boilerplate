@@ -3,6 +3,7 @@ export const resources = {
     common: {
       appErrorTitle: "Something went wrong",
       learnMore: "Learn more",
+      offline: "You are offline",
     },
     tabs: {
       home: "Home",
@@ -66,6 +67,7 @@ export const resources = {
     common: {
       appErrorTitle: "Une erreur est survenue",
       learnMore: "En savoir plus",
+      offline: "Vous êtes hors ligne",
     },
     tabs: {
       home: "Accueil",
