@@ -16,9 +16,13 @@ const defaultConfig = {
 };
 
 const PROVIDER_ENV_KEYS = {
-  supabase: ["EXPO_PUBLIC_API_URL"],
-  convex: ["EXPO_PUBLIC_API_URL"],
-  firebase: ["EXPO_PUBLIC_API_URL"],
+  supabase: ["EXPO_PUBLIC_SUPABASE_URL", "EXPO_PUBLIC_SUPABASE_ANON_KEY"],
+  convex: ["EXPO_PUBLIC_CONVEX_URL"],
+  firebase: [
+    "EXPO_PUBLIC_FIREBASE_API_KEY",
+    "EXPO_PUBLIC_FIREBASE_PROJECT_ID",
+    "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN",
+  ],
   custom: ["EXPO_PUBLIC_API_URL"],
 };
 
