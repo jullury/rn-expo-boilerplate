@@ -253,12 +253,23 @@ pnpm run project:health -- --json
 pnpm run project:health -- --json --output-file health-report.json
 ```
 
+Exit mode options:
+
+```bash
+# default: strict (non-zero exit if score < 100)
+pnpm run project:health -- --strict
+
+# warning mode: always exits 0
+pnpm run project:health -- --warn
+```
+
 Health output includes:
 
 - weighted score (`0-100`)
 - pass/fail count
 - individual checks
 - severity-tagged recommendations when checks fail
+- mode (`strict` or `warn`)
 
 ## Runbooks
 
