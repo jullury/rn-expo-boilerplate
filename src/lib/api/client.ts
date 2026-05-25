@@ -1,6 +1,8 @@
 import { create, type AxiosRequestConfig } from "axios";
 
 import { resolveApiProviderAdapter } from "@/lib/api/providers/generated/adapter-resolver";
+import { handle401Retry } from "@/lib/api/auth-retry";
+import { getRuntimeAuthProvider } from "@/lib/auth/runtime-provider";
 import { incrementMetric } from "@/lib/observability/metrics";
 
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
@@ -55,7 +57,15 @@ apiClient.interceptors.request.use((config) => {
     return Promise.reject(new Error("Circuit breaker is open"));
   }
 
-  return config;
+  const authProvider = getRuntimeAuthProvider();
+  return authProvider.getAccessToken().then((accessToken) => {
+    if (accessToken) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    return config;
+  });
 });
 
 apiClient.interceptors.response.use(
@@ -68,9 +78,24 @@ apiClient.interceptors.response.use(
   async (error) => {
     incrementMetric("api.request.error");
     const config = error.config as
-      | (AxiosRequestConfig & { __retryCount?: number })
+      | (AxiosRequestConfig & {
+          __retryCount?: number;
+          __authRetried?: boolean;
+        })
       | undefined;
     const status = error.response?.status as number | undefined;
+
+    if (status === 401 && config) {
+      try {
+        const retriable = await handle401Retry({ config });
+        if (retriable) {
+          return apiClient(retriable);
+        }
+      } catch {
+        await getRuntimeAuthProvider().signOut();
+        return Promise.reject(error);
+      }
+    }
 
     const retryable = !status || RETRYABLE_STATUS.has(status);
     if (!config || !retryable) {
